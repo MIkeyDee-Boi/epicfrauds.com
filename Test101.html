@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EREBUS INITIATIVE :: M.I.N.D. Honeypot Interface</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <style>
+        /*
+         * EPICFRAUDS.COM // JUSTICE, EXPOSED.
+         * Project Chimera // Version 4.5 Event-Driven Audio Module
+         * Developed by: AETOS Cybernetics Systems - Project Development Team (x1000)
+         * Status: ONLINE / OPERATIONAL
+         * Confidentiality Level: TOP SECRET // EYES ONLY
+         */
+
+        :root {
+            --bg-color: #010201; /* Deep Black background */
+            --scanline-color: rgba(0, 25, 0, 0.25); /* Stronger green scanlines */
+            --glow-color: rgba(60, 255, 120, 0.8); /* Brighter, vibrant green glow */
+            --text-color: #00ff55; /* Crisper green text */
+            --error-color: #ff4141; /* Red error */
+            --warning-color: #f9d531; /* Yellow warning */
+            --info-color: #33b1ff; /* Blue info */
+            --accent-color: #ffa500; /* Orange accent */
+            --crash-text-color: #FFFFFF; /* White for final crash text */
+            --crash-glow-color: rgba(255, 255, 255, 0.9);
+            --matrix-color: rgba(0, 150, 0, 0.1); /* Subtle matrix rain green */
+            --matrix-char-color: rgba(0, 255, 0, 0.6); /* Brighter matrix characters */
+            --cursor-trail-color: rgba(0, 255, 85, 0.3); /* Transparent green for trail */
+        }
+
+        html, body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Share Tech Mono', 'Consolas', 'Monaco', monospace;
+            font-size: 16px;
+            margin: 0; padding: 0;
+            overflow: hidden;
+            cursor: none;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            user-select: none;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
+        #crt-container {
+            width: 100vw; height: 100vh;
+            overflow: hidden;
+            position: relative;
+            background: radial-gradient(ellipse at center, rgba(0,255,85,0.05) 0%, transparent 70%);
+            box-shadow: inset 0 0 50px rgba(0, 255, 85, 0.2);
+            animation: text-flicker 2.5s linear infinite alternate;
+        }
+
+        /* Glitch Effect */
+        body.glitch-active #crt-container {
+            animation: text-flicker 0.1s linear infinite,
+                       glitch-flicker 0.05s infinite alternate;
+        }
+        @keyframes glitch-flicker {
+            0% { transform: translate(0px, 0px) skewX(0deg); opacity: 1; }
+            30% { transform: translate(2px, 1px) skewX(0.5deg); opacity: 0.8; }
+            31% { transform: translate(-3px, -2px) skewX(-1deg); opacity: 1; }
+            60% { transform: translate(1px, -1px) skewX(0.2deg); opacity: 0.9; }
+            100% { transform: translate(0px, 0px) skewX(0deg); opacity: 1; }
+        }
+
+        /* Power Outage / Screen Shake Effect */
+        body.power-outage #crt-container {
+            animation: screen-shake 0.1s linear infinite alternate,
+                       text-flicker-heavy 0.05s linear infinite;
+            filter: brightness(0.7) contrast(1.2) hue-rotate(5deg);
+        }
+        @keyframes screen-shake {
+            0% { transform: translate(1px, 1px); }
+            25% { transform: translate(-1px, -1px); }
+            50% { transform: translate(1.5px, -0.5px); }
+            75% { transform: translate(-0.5px, 1.5px); }
+            100% { transform: translate(1px, 1px); }
+        }
+        @keyframes text-flicker-heavy {
+            0%, 100% { opacity: 1; } 10% { opacity: 0.7; } 20% { opacity: 1; }
+            30% { opacity: 0.6; } 40% { opacity: 1; } 50% { opacity: 0.5; }
+            60% { opacity: 1; } 70% { opacity: 0.8; } 80% { opacity: 1; }
+            90% { opacity: 0.7; }
+        }
+
+        #terminal {
+            width: calc(100% - 40px); height: calc(100% - 40px);
+            padding: 20px; box-sizing: border-box;
+            overflow-y: scroll; white-space: pre-wrap;
+            word-break: break-all;
+            text-shadow: 0 0 8px var(--glow-color), 0 0 4px rgba(0,0,0,0.5);
+            scrollbar-width: none;
+            position: relative; z-index: 2; transform: translateZ(0);
+        }
+        #terminal::-webkit-scrollbar { display: none; }
+
+        #scanline-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            background: repeating-linear-gradient(0deg, var(--scanline-color), var(--scanline-color) 1px, transparent 1px, transparent 4px);
+            animation: crt-flicker 0.1s infinite step-end;
+            opacity: 0.9; z-index: 3;
+        }
+
+        /* Intense flicker for data transfer phase */
+        #scanline-overlay.intense-flicker {
+            animation: crt-flicker-intense 0.03s infinite step-end,
+                       chromatic-flicker 0.1s linear infinite alternate;
+            opacity: 0.98;
+        }
+        @keyframes crt-flicker-intense {
+            0%, 100% { opacity: 0.98; } 25% { opacity: 0.6; } 50% { opacity: 0.95; } 75% { opacity: 0.65; }
+        }
+        @keyframes chromatic-flicker {
+            0% { filter: hue-rotate(0deg); } 25% { filter: hue-rotate(2deg); } 50% { filter: hue-rotate(0deg); }
+            75% { filter: hue-rotate(-2deg); } 100% { filter: hue-rotate(0deg); }
+        }
+
+        #vignette-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.8); z-index: 4;
+        }
+
+        #matrix-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; overflow: hidden; z-index: 1; opacity: 0.08;
+        }
+        .matrix-column {
+            position: absolute; width: 15px; white-space: nowrap; overflow: hidden;
+            font-family: 'Share Tech Mono', monospace; font-size: 14px;
+            color: var(--matrix-char-color); text-shadow: 0 0 5px var(--matrix-char-color);
+            animation: matrix-fall linear infinite;
+        }
+        @keyframes matrix-fall { from { transform: translateY(-100%); } to { transform: translateY(100vh); } }
+
+        @keyframes crt-flicker { 0%, 100% { opacity: 0.95; } 50% { opacity: 0.85; } }
+        @keyframes text-flicker { 0% { opacity: 0.99; } 2% { opacity: 0.5; } 4% { opacity: 0.99; } 100% { opacity: 0.99; } }
+
+        /* Chromatic Aberration (on terminal, not overlay) */
+        #terminal::before, #terminal::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -1; pointer-events: none;
+        }
+        #terminal::before { background-color: rgba(255, 0, 0, 0.02); transform: translate(-1px, -1px); }
+        #terminal::after { background-color: rgba(0, 0, 255, 0.02); transform: translate(1px, 1px); }
+
+        .cursor {
+            display: inline-block; background-color: var(--text-color);
+            box-shadow: 0 0 12px var(--glow-color); width: 12px; height: 20px;
+            animation: blink 0.7s step-end infinite; margin-left: 6px; vertical-align: bottom;
+        }
+        .cursor.off { animation: none; background-color: transparent; box-shadow: none; }
+        @keyframes blink { 50% { background-color: transparent; box-shadow: none; } }
+        .hidden { display: none; }
+        .error { color: var(--error-color); text-shadow: 0 0 9px var(--error-color); }
+        .warning { color: var(--warning-color); text-shadow: 0 0 9px var(--warning-color); }
+        .success { color: #50ff50; text-shadow: 0 0 9px #50ff50; }
+        .info { color: var(--info-color); text-shadow: 0 0 9px var(--info-color); }
+        .accent { color: var(--accent-color); text-shadow: 0 0 9px var(--accent-color); }
+        .dim { color: #888; text-shadow: 0 0 3px #888; }
+
+        .progress-bar-container {
+            border: 1px solid var(--text-color); padding: 3px; width: 75%; margin: 8px 0;
+            box-shadow: inset 0 0 8px var(--glow-color); position: relative; overflow: hidden; background-color: rgba(0,0,0,0.3);
+        }
+        .progress-bar-fill {
+            background-color: var(--text-color); height: 18px; width: 0%;
+            transition: width 0.3s cubic-bezier(0.61,0.01,0.33,1.01);
+        }
+        .progress-bar-fill::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(45deg, rgba(255,255,255,0.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.15) 75%, transparent 75%, transparent);
+            background-size: 20px 20px; animation: progress-stripes 0.5s linear infinite;
+        }
+        @keyframes progress-stripes { from { background-position: 20px 0; } to { background-position: 0 0; } }
+        .progress-time { font-size: 0.9em; color: var(--dim); margin-left: 10px; }
+
+        .ascii-3d {
+            transform: perspective(600px) rotateX(2deg) rotateY(-3deg) scale(1.01);
+            text-shadow: 3px 3px 10px rgba(0, 255, 100, 0.4); display: block; line-height: 1;
+        }
+
+        /* Mouse effects */
+        .mouse-trail {
+            position: absolute; background-color: var(--cursor-trail-color); border-radius: 50%;
+            pointer-events: none; opacity: 0; transform: scale(0); animation: fadeOutTrail 0.5s forwards;
+            box-shadow: 0 0 5px var(--cursor-trail-color); z-index: 100; width: 10px; height: 10px;
+        }
+        @keyframes fadeOutTrail { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(2); } }
+        body.mouse-jitter { cursor: none !important; }
+        body.mouse-jitter #custom-cursor { transition: transform 0.01s ease-out; }
+        #custom-cursor {
+            position: fixed; width: 16px; height: 16px; background-color: var(--text-color); border-radius: 50%;
+            box-shadow: 0 0 10px var(--glow-color), 0 0 20px rgba(0, 255, 85, 0.5); pointer-events: none;
+            z-index: 99; transform: translate(-50%, -50%);
+        }
+
+        /* Hidden disclaimer */
+        #hidden-disclaimer {
+            position: absolute; top: 500vh; left: 0; width: 100%; text-align: center;
+            font-size: 10px; color: rgba(255, 255, 255, 0.1); padding: 20px; white-space: pre-wrap;
+            user-select: text; cursor: default; text-transform: none;
+        }
+    </style>
+</head>
+<body>
+<div id="matrix-overlay"></div>
+<div id="scanline-overlay"></div>
+<div id="vignette-overlay"></div>
+<div id="crt-container">
+    <div id="terminal">
+        <div id="output"></div>
+        </div>
+</div>
+<div id="custom-cursor"></div>
+<div id="hidden-disclaimer">
+    <p>
+        -------------------------------------------------------------<br>
+        ATTENTION! YOU HAVE STUMBLED UPON EPICFRAUDS.COM!<br>
+        -------------------------------------------------------------<br>
+        <br>
+        THIS WEBSITE IS PURELY FOR ENTERTAINMENT PURPOSES. IT IS A PARODY<br>
+        AND A JOKE DESIGNED TO PRANK YOUR FRIENDS. ABSOLUTELY NO MALICIOUS<br>
+        ACTIVITY OR DATA COMPROMISE IS ACTUALLY OCCURRING.<br>
+        <br>
+        ALL "HACKING" SIMULATIONS, "IP ADDRESSES," "FILE DOWNLOADS," AND<br>
+        "SYSTEM INFECTIONS" ARE FICTIONAL AND PART OF THE SCRIPTED DISPLAY.<br>
+        YOUR DEVICE HAS NOT BEEN COMPROMISED. YOUR DATA IS SAFE.<<br>
+        <br>
+        DO NOT USE THIS SCRIPT FOR ANY ACTUAL ILLEGAL OR HARMFUL ACTIVITIES.<br>
+        IT IS INTENDED SOLELY FOR HUMOROUS PRANKS AND LIGHTHEARTED FUN.<br>
+        <br>
+        BY CONTINUING TO USE THIS SITE, YOU ACKNOWLEDGE AND AGREE TO THIS DISCLAIMER.<br>
+        PLEASE PLAY RESPONSIBLY AND ETHICALLY.<br>
+        <br>
+        © 2025 EPICFRAUDS.COM - ALL JOKES RESERVED.<br>
+        DEVELOPER TEAM: The AETOS Cybernetics Systems Group (Est. 2020)<br>
+        CONTACT: support@epicfrauds.com (No, really, it's fake too!)
+        <br>
+        -------------------------------------------------------------
+    </p>
+</div>
+
+
+<script>
+    // --- Tone.js Synths ---
+    let audioEnabled = false, synths = {};
+    let humPitchModulationInterval = null;
+
+    function setupAudio() {
+        if (audioEnabled) return;
+        try {
+            Tone.start();
+            // New Beep Sounds
+            synths.processingBeep = new Tone.MembraneSynth({
+                pitchDecay: 0.005,
+                envelope: { attack: 0.001, decay: 0.02, sustain: 0, release: 0.02 },
+                volume: -25
+            }).toDestination();
+            synths.transferBeep = new Tone.MembraneSynth({
+                pitchDecay: 0.01,
+                octaves: 2,
+                envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 },
+                volume: -20
+            }).toDestination();
+            synths.alertBeep = new Tone.MembraneSynth({
+                pitchDecay: 0.02,
+                octaves: 4,
+                envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 },
+                volume: -15
+            }).toDestination();
+            synths.errorBeep = new Tone.MonoSynth({
+                oscillator: { type: "square" },
+                envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.2 },
+                volume: -10
+            }).toDestination();
+            
+            // Existing sounds (some retuned or re-purposed)
+            synths.glitch = new Tone.NoiseSynth({
+                noise: { type: 'brownian' },
+                envelope: { attack: 0.001, decay: 0.05, sustain: 0.01, release: 0.05 },
+                volume: -20
+            }).toDestination();
+            synths.staticBurst = new Tone.NoiseSynth({
+                noise: { type: 'white' },
+                envelope: { attack: 0.001, decay: 0.3, sustain: 0, release: 0.3 },
+                volume: -10
+            }).toDestination();
+            synths.powerDown = new Tone.MembraneSynth({
+                pitchDecay: 0.2, octaves: 10, envelope: { attack: 0.001, decay: 0.8, sustain: 0.01, release: 0.5 }, volume: -5
+            }).toDestination();
+            synths.powerUp = new Tone.MembraneSynth({
+                pitchDecay: 0.2, octaves: 10, envelope: { attack: 0.001, decay: 0.8, sustain: 0.01, release: 0.5 }, volume: -5
+            }).toDestination();
+
+            audioEnabled = true;
+        } catch (e) {
+            console.error("Failed to setup audio. Continuing without sound:", e);
+            audioEnabled = false;
+        }
+    }
+
+    function playSound(sound, note = 'C4', duration = '8n') {
+        if (!audioEnabled) return;
+        try {
+            if (synths[sound]) {
+                if (sound === 'glitch' || sound === 'staticBurst' || sound === 'powerDown' || sound === 'powerUp' || sound === 'processingBeep') {
+                    synths[sound].triggerAttackRelease(duration);
+                } else if (sound === 'errorBeep') {
+                    synths[sound].triggerAttackRelease('C2', '16n'); // Lower tone for error
+                } else if (sound === 'transferBeep') {
+                    synths[sound].triggerAttackRelease('D4', '32n'); // Medium tone for transfer
+                } else if (sound === 'alertBeep') {
+                    synths[sound].triggerAttackRelease('G5', '16n'); // High tone for alert
+                } else {
+                    // Fallback for general notes if passed
+                    if (synths[sound].triggerAttackRelease) {
+                        synths[sound].triggerAttackRelease(note, duration);
+                    }
+                }
+            }
+        } catch (e) { console.warn("Audio playback failed for", sound, ":", e); }
+    }
+
+    // --- Terminal Logic ---
+    const term = {
+        output: document.getElementById('output'),
+        crtContainer: document.getElementById('crt-container'),
+        scanlineOverlay: document.getElementById('scanline-overlay'),
+        customCursor: document.getElementById('custom-cursor'),
+    };
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    let mouseJitterInterval = null;
+
+    // --- Mouse Trail Effect ---
+    document.addEventListener('mousemove', (e) => {
+        if (term.customCursor) {
+            term.customCursor.style.left = `${e.clientX}px`;
+            term.customCursor.style.top = `${e.clientY}px`;
+        }
+        const trail = document.createElement('div');
+        trail.classList.add('mouse-trail');
+        trail.style.left = `${e.clientX}px`;
+        trail.style.top = `${e.clientY}px`;
+        document.body.appendChild(trail);
+        trail.addEventListener('animationend', () => {
+            trail.remove();
+        });
+    });
+
+    // --- Mouse Jitter Effect Functions ---
+    function startMouseJitter() {
+        document.body.classList.add('mouse-jitter');
+        const jitterAmount = 50; /* Much crazier jitter */
+        const intervalTime = 10; /* Even faster updates */
+        mouseJitterInterval = setInterval(() => {
+            if (term.customCursor) {
+                const offsetX = (Math.random() - 0.5) * jitterAmount * 2;
+                const offsetY = (Math.random() - 0.5) * jitterAmount * 2;
+                term.customCursor.style.transform = `translate(-50%, -50%) translate(${offsetX}px, ${offsetY}px)`;
+            }
+        }, intervalTime);
+    }
+    function stopMouseJitter() {
+        clearInterval(mouseJitterInterval);
+        mouseJitterInterval = null;
+        document.body.classList.remove('mouse-jitter');
+        if (term.customCursor) {
+            term.customCursor.style.transform = `translate(-50%, -50%)`;
+        }
+    }
+
+    // --- Matrix Rain Effect ---
+    function createMatrixRain() {
+        const matrixOverlay = document.getElementById('matrix-overlay');
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{};':\"|,./<>?";
+        const columnCount = Math.floor(window.innerWidth / 15);
+        for (let i = 0; i < columnCount; i++) {
+            const column = document.createElement('div');
+            column.classList.add('matrix-column');
+            column.style.left = `${i * 15}px`;
+            column.style.animationDuration = `${Math.random() * 5 + 3}s`;
+            column.style.animationDelay = `-${Math.random() * 5}s`;
+            matrixOverlay.appendChild(column);
+            let columnText = '';
+            for (let j = 0; j < 50; j++) { columnText += chars[Math.floor(Math.random() * chars.length)] + '\n'; }
+            column.textContent = columnText;
+        }
+    }
+
+    async function getVisitorData() { /* Simplified for brevity, same as previous */
+        const data = {};
+        data.ua = navigator.userAgent; data.platform = navigator.platform; data.language = navigator.language;
+        data.screen = `${window.screen.width}x${window.screen.height}x${window.screen.colorDepth}`;
+        data.os = (ua => ua.includes("Win") ? "WINDOWS NT" : ua.includes("Mac") ? "DARWIN/MACOS" : ua.includes("Linux") ? "LINUX KERNEL" : "UNKNOWN")(data.ua);
+        data.browser = (ua => ua.includes("Firefox") ? "FIREFOX" : ua.includes("Chrome") ? "CHROMIUM-BASED" : ua.includes("Safari") ? "WEBKIT/SAFARI" : "GENERIC")(data.ua);
+        data.cores = navigator.hardwareConcurrency || 'N/A';
+        try { /* Stubbed out actual API call for brevity */
+            data.ip = '192.168.1.100'; data.org = 'UNRESOLVED'; data.location = 'UNDEFINED'; data.vpn = false;
+            data.lat = 'N/A'; data.lon = 'N/A';
+        } catch (e) {
+            console.warn("Geolocation API failed:", e); data.ip = '0.0.0.0'; data.org = 'UNRESOLVED'; data.location = 'UNDEFINED'; data.vpn = true; data.lat = 'N/A'; data.lon = 'N/A';
+        }
+        return data;
+    }
+
+    async function scrollLog(lines, delay = 20) {
+        for (const line of lines) {
+            term.output.innerHTML += `<span>${line}</span>\n`;
+            term.output.parentElement.scrollTop = term.output.parentElement.scrollHeight;
+            playSound('processingBeep', null, '32n'); /* Beep for each line */
+            await sleep(delay);
+        }
+    }
+
+    async function showAscii(asciiLines, className = 'accent', delay = 50) {
+        for(const line of asciiLines) {
+            term.output.innerHTML += `<span class="${className}">${line}</span>\n`;
+            term.output.parentElement.scrollTop = term.output.parentElement.scrollHeight;
+            playSound('alertBeep', null, '32n'); /* Alert beep for ASCII art */
+            await sleep(delay);
+        }
+    }
+
+    async function renderProgressBar(label, duration = 1000) {
+        const startTime = performance.now();
+        const container = document.createElement('div');
+        container.innerHTML = `<span>${label}</span><div class="progress-bar-container"><div class="progress-bar-fill"></div></div><span class="progress-time"></span>`;
+        term.output.appendChild(container);
+        const fill = container.querySelector('.progress-bar-fill');
+        const timeSpan = container.querySelector('.progress-time');
+        term.output.parentElement.scrollTop = term.output.parentElement.scrollHeight;
+        playSound('transferBeep', null, '32n'); /* Transfer beep on start */
+        await sleep(100);
+        fill.style.width = '100%'; await sleep(duration);
+        playSound('confirm', 'C6', '64n'); /* Confirm sound on completion */
+        const endTime = performance.now(); const timeTaken = ((endTime - startTime) / 1000).toFixed(2);
+        timeSpan.textContent = ` (${timeTaken}s)`;
+        await scrollLog(['<span class="success">COMPLETE.</span>'], 10);
+    }
+
+    async function triggerGlitch(duration = 500) {
+        document.body.classList.add('glitch-active');
+        playSound('glitch', null, '0.1s'); await sleep(duration);
+        document.body.classList.remove('glitch-active');
+    }
+    
+    async function powerOutageEffect(durationMs = 3000) {
+        document.body.classList.add('power-outage');
+        playSound('powerDown', 'C1', '2s'); playSound('staticBurst', null, '0.5s');
+        const startTime = performance.now();
+        while (performance.now() - startTime < durationMs) {
+            term.crtContainer.style.filter = `brightness(${0.7 + Math.random() * 0.3}) contrast(${1.2 + Math.random() * 0.3}) hue-rotate(${Math.random() * 10 - 5}deg)`;
+            term.scanlineOverlay.style.opacity = `${0.6 + Math.random() * 0.4}`;
+            if (Math.random() < 0.2) playSound('staticBurst', null, '0.1s');
+            await sleep(50 + Math.random() * 50);
+        }
+        document.body.classList.remove('power-outage');
+        term.crtContainer.style.filter = ''; term.scanlineOverlay.style.opacity = '0.9';
+        playSound('powerUp', 'C6', '0.5s');
+    }
+
+    /* Joker ASCII Art (now a constant) */
+    const JOKER_ASCII = [
+        "00000111111100000",
+        "00001000000010000",
+        "00010110000110100",
+        "00100010000100010",
+        "01001000000010010",
+        "01001000000010010",
+        "10000000000000001",
+        "10011111111111101",
+        "10000000000000001",
+        "01000000000000010",
+        "00100000000000100",
+        "00010000000001000",
+        "00001111111110000"
+    ];
+
+    /* Skull & Crossbones ASCII Art (new constant) */
+    const SKULL_CROSSBONES_ASCII = [
+        "000000000000000000000",
+        "000000001111100000000",
+        "000000100000010000000",
+        "000001010001010000000",
+        "000001001010010000000",
+        "000000100000010000000",
+        "000000010001000000000",
+        "000000001111100000000",
+        "000000000000000000000",
+        "110000000000000000011",
+        "011000000000000000110",
+        "001100000000000011000",
+        "000110000000000110000"
+    ];
+
+
+    async function rapidIpScan(baseIp, count = 40, delay = 15) { /* Slower delay here */
+        await scrollLog(['<span class="info">NETWORK INFECTION: LATERAL MOVEMENT...</span>'], 35); /* Slower */
+        const ipParts = baseIp.split('.'); const base = ipParts.slice(0, 3).join('.');
+        for (let i = 0; i < count; i++) {
+            const randomLastOctet = Math.floor(Math.random() * 254) + 1;
+            const currentIp = `${base}.${randomLastOctet}`;
+            let status;
+            if (Math.random() > 0.3) {
+                status = '<span class="success">[COMPROMISED]</span>';
+                playSound('transferBeep', null, '64n'); /* Success beep */
+            } else {
+                status = '<span class="warning">[ACCESS DENIED]</span>';
+                playSound('errorBeep', null, '64n'); /* Error beep */
+            }
+            term.output.innerHTML += `<span>  > ACCESS: ${currentIp} ${status}</span>\n`;
+            term.output.parentElement.scrollTop = term.output.parentElement.scrollHeight;
+            await sleep(delay);
+        }
+        await scrollLog(['<span class="success">LATERAL MOVEMENT COMPLETE.</span>'], 35); /* Slower */
+    }
+
+    // --- Main Compromise Sequence ---
+    async function startCompromiseSequence() {
+        // Setup initial state for this page (runs on load)
+        createMatrixRain();
+        setupAudio();
+        
+        const d = await getVisitorData();
+        window.visitor_data = d;
+
+        await scrollLog([
+            'BIOS INITIALIZING...',
+            'MEMORY: 4096GB DDR6 ECC, CPU: XEON E8-9590 vPro, CORES: 192',
+            'FIRMWARE: VERIFIED',
+            'SECURE BOOT: ENABLED',
+            'AETOS CYBERNETIC SYSTEMS',
+        ], 20); await sleep(500);
+        await showAscii(JOKER_ASCII, 'info ascii-3d', 70); /* Joker ASCII for initial boot */
+        await scrollLog(['<span class="info">"HELLO, OLD FRIEND." - INITIATING JOKER PROTOCOL.</span>', ''], 60); /* Slower */
+        await sleep(200);
+        await scrollLog([
+            'LOADING KERNEL... [LOADED]',
+            'KERNEL INTEGRITY: [HASH MATCH]',
+            'SYSTEMD: [ACTIVE]',
+            'FSCK PASSED. INTEGRITY: [██████████████████] 100%'
+        ], 25);
+        await renderProgressBar('INITIALIZING CORE SYSTEM MODULES...', 600); await sleep(300);
+        await scrollLog([
+            'NETWORK: ACTIVE | FIREWALL: ONLINE',
+            'SSH: SECURE',
+            'REMOTE DESKTOP: CRITICAL',
+            'ANONYMOUS ROOT ACCESS: ENABLED',
+            'VISITOR PRIVILEGES: ELEVATED (ROOT)',
+            '',
+            'AUTHENTICATING SESSION...',
+            ` - VISITOR HASH: ${Math.random().toString(36).slice(2,10).toUpperCase()}`,
+            ' - SECURITY CLEARANCE: TOP SECRET',
+            ' - THREATS: NONE DETECTED'
+        ], 30); await sleep(800);
+
+        await showAscii(SKULL_CROSSBONES_ASCII, 'accent ascii-3d', 70); /* Skull & Crossbones ASCII */
+        await scrollLog(['<span class="warning">MALWARE SIGNATURE: BLACK FLAG INITIATED.</span>', ''], 60); /* Slower */
+        await sleep(200);
+
+        await scrollLog([
+            'INITIATING VISITOR DEVICE INTELLIGENCE ACQUISITION...',
+            '<span class="dim">    (SYSTEM FINGERPRINTING & ENVIRONMENTAL SCAN...)</span>'
+        ], 30);
+        await renderProgressBar('PERFORMING DEEP SCAN OF CLIENT ENVIRONMENT...', 700); await sleep(200);
+        
+        const visitor_data = window.visitor_data || await getVisitorData();
+        await scrollLog([
+            '-----------------------------------------------------',
+            '| <span class="accent">VISITOR SYSTEM PROFILE / THREAT ASSESSMENT</span>      |',
+            '-----------------------------------------------------',
+            `> IP_ADDRESS          : <span class="warning">${visitor_data.ip || '?'}</span>`,
+            `> GEO-LOCATION        : <span class="warning">${visitor_data.location || '?'}</span>`,
+            `> OS_PLATFORM         : <span class="info">${visitor_data.os}</span> / <span class="info">${visitor_data.platform}</span>`,
+            `> BROWSER_AGENT       : <span class="info">${visitor_data.browser}</span>`,
+            `> COMPUTER_NAME       : <span class="info">${(Math.random().toString(36).slice(2,8).toUpperCase() + '-' + Math.floor(Math.random()*999))}</span>`,
+            `> GPU                 : <span class="info">${visitor_data.gpu}</span>`,
+            '-----------------------------------------------------'
+        ], 60);
+        await sleep(10000); /* 10-SECOND PAUSE HERE */
+
+        await scrollLog(['<span class="success">M.I.N.D. LINK ESTABLISHED. PROTOCOL SYNCHRONIZED.</span>', '<span class="success">PRIVILEGES: ROOT ACCESS [ADMINISTRATIVE CONTROL]</span>', ''], 60);
+        await scrollLog(['<span class="info">INITIATING HIGH-SPEED DATA EXFILTRATION & SYSTEM INFECTION...</span>'], 40); await sleep(400);
+
+        term.scanlineOverlay.classList.add('intense-flicker');
+        startMouseJitter();
+
+        await rapidIpScan(visitor_data.ip || '192.168.1.1', 40, 15); await sleep(400);
+        
+        await renderProgressBar('ENCRYPTED TUNNEL ESTABLISHMENT: QUANTUM_SECURE_CHANNEL...', 400);
+        await scrollLog(['<span class="warning">DEPLOYING AUTONOMOUS TRACKING MODULE... [OK]</span>'], 25); await sleep(120);
+        await renderProgressBar('OS_LEVEL HOOK INJECTION: KERNEL_API_INTERCEPTION...', 600);
+        await scrollLog(['<span class="error">MEMORY DUMP INITIATED: VOLATILE_DATA_ACQUISITION... [LIVE]</span>'], 25); await sleep(120);
+        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/USER_PROFILES/DOCUMENTS.zip...', 500);
+        await scrollLog(['<span class="info">EVADING EDR/XDR SYSTEMS: BEHAVIORAL_ANOMALY_BYPASS... [SUCCESS]</span>'], 25); await sleep(120);
+        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/USER_PROFILES/MULTIMEDIA_CACHE.zip...', 750);
+        await scrollLog(['<span class="error">INJECTING ZERO-DAY EXPLOIT: "GHOST_SHELL_V2"... [ACTIVE]</span>'], 25); await sleep(120);
+        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/BROWSER_TEMP/HISTORY_LOGS.db...', 450);
+        await scrollLog(['<span class="warning">ESTABLISHING C2 CHANNEL: SECURE_BEACON_LINK... [ONLINE]</span>'], 25); await sleep(120);
+        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/OS_METADATA/EVENT_LOGS.dat...', 500);
+        await scrollLog(['<span class="info">ACTIVATING SENSOR NET: CAMERA & MICROPHONE FEEDS... [LIVE]</span>'], 25); await sleep(120);
+        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/OS_METADATA/REGISTRY_HIVECRYPT.enc...', 650);
+        await scrollLog(['<span class="error">ROOTKIT DEPLOYMENT: "GHOST_KERNEL.SYS"... [INJECTED]</span>'], 25); await sleep(120);
+        await renderProgressBar('EXTRACTING SAVED CREDENTIALS (LEVEL-5 ENCRYPTION BREAK)...', 900);
+        await scrollLog(['<span class="warning">INSTALLING PERSISTENT KEYLOGGER: AETOS_LOGGER_V7... [ACTIVATED]</span>'], 25); await sleep(120);
+        await renderProgressBar('ACCESSING CORE SYSTEM FILES (READ/WRITE OVERRIDE)...', 550);
+        await scrollLog(['<span class="info">INITIATING DATA WIPE PROTOCOL FOR TRACKS... [ACTIVE]</span>'], 25); await sleep(120);
+        await renderProgressBar('CAPTURING LIVE SCREENSHOT STREAM (ENCRYPTED_CHANNEL_9)...', 480);
+        await scrollLog(['<span class="error">BIOS PAYLOAD INJECTION: "PROMETHEUS_BOOTKIT"... [SUCCESS]</span>'], 25); await sleep(120);
+        await renderProgressBar('UPLOADING COMPROMISED DATA TO SECURE NODE: EREBUS-ALPHA-SERVER...', 1200);
+        await scrollLog(['<span class="warning">VERIFYING DATA INTEGRITY: CHECKSUM MATCH... [OK]</span>'], 25); await sleep(120);
+        await renderProgressBar('EXECUTING PRIVILEGE ESCALATION MODULE...', 900);
+        await scrollLog(['<span class="error">SYSTEM KERNEL EXPLOIT: "ZERO_DAY_OMNIBREACH"... [ACTIVE]</span>'], 25); await sleep(120);
+        await renderProgressBar('DISABLING LOCAL SECURITY CONTROLS (AV/FIREWALL/EDR)...', 800);
+        await scrollLog(['<span class="info">MAPPING NETWORK TOPOLOGY & ACTIVE DEVICES... [DISCOVERED]</span>'], 25); await sleep(120);
+        await renderProgressBar('INITIATING COVERT CHANNEL DATA EXFILTRATION...', 1000);
+        await scrollLog(['<span class="warning">HARDENING PERSISTENT BACKDOOR ACCESS... [COMPLETE]</span>'], 25); await sleep(120);
+
+        await scrollLog([
+            'SENDING CLASSIFIED_REPORT_1 TO HQ... [OK]',
+            'SENDING CLASSIFIED_REPORT_2 TO HQ... [OK]',
+            'SENDING CLASSIFIED_REPORT_3 TO HQ... [OK]',
+            'SENDING CLASSIFIED_REPORT_4 TO HQ... [OK]',
+            'SENDING CLASSIFIED_REPORT_5 TO HQ... [OK]',
+            'SENDING CLASSIFIED_REPORT_6 TO HQ... [OK]',
+            'SENDING CLASSIFIED_REPORT_7 TO HQ... [OK]',
+            'SENDING CLASSIFIED_REPORT_8 TO HQ... [OK]',
+        ], 40); /* Slower email sending */
+
+        await renderProgressBar('ENUMERATING REMOTE DESKTOP CONNECTIONS & OPEN PORTS...', 550);
+        await scrollLog(['<span class="warning">ACCESSING SHARED NETWORK DRIVES... [COMPLETE]</span>'], 25); await sleep(120);
+        await renderProgressBar('RESETTING USER CREDENTIALS FOR SYSTEM LOCKOUT...', 450);
+        await scrollLog(['<span class="error">SYSTEM IMMOBILIZATION PROTOCOL... [ACTIVE]</span>'], 25); await sleep(120);
+        await renderProgressBar('INITIATING DATA EXFILTRATION PROTOCOL (FINAL STAGE)...', 650);
+        await scrollLog(['<span class="info">COMPROMISE ACHIEVED. LOCAL SYSTEM INTEGRITY: NULLIFIED.</span>'], 25); await sleep(120);
+        await renderProgressBar('ERASING ALL SYSTEM LOGS AND TRACKS (FORENSIC COUNTERMEASURES)...', 600);
+
+        term.scanlineOverlay.classList.remove('intense-flicker');
+        stopMouseJitter();
+        
+        await scrollLog([
+            '<span class="warning">SYSTEM INSTABILITY DETECTED. CRITICAL POWER FLUCTUATION.</span>'
+        ], 60); await sleep(800);
+        await powerOutageEffect(4000);
+
+        await scrollLog([
+            '<span class="warning">INITIATING SYSTEM CLONING SEQUENCE... PLEASE STAND BY.</span>'
+        ], 60); playSound('alertBeep', 'F2', '4n'); await sleep(1000);
+        await triggerGlitch(800);
+        await scrollLog([
+            '<span class="success">CLONING COMPLETE.</span>',
+            '<span class="success">DUPLICATE SYSTEM IMAGE CREATED.</span>',
+            ''
+        ], 60); playSound('success', 'G6', '2n');
+
+        await sleep(3000); /* Longer pause before final summary appears */
+        term.output.innerHTML = ''; /* Clear screen for a clean summary */
+        await scrollLog([ /* Final summary */
+            '-----------------------------------------------------------------',
+            '| <span class="accent">EXFILTRATION & COMPROMISE REPORT</span>   |',
+            '-----------------------------------------------------------------',
+            `OPERATION STATUS      : <span class="success">COMPLETE & SUCCESSFUL</span>`,
+            `TARGET ID             : <span class="warning">${visitor_data.ip || "UNKNOWN"}</span>`,
+            `CLONE NODE            : <span class="success">${Array.from({length: 4}, () => Math.floor(Math.random()*256)).join('.')}</span>`,
+            '',
+            '<span class="info">DATA ACQUIRED: DOCUMENTS, HISTORY, MEDIA, LOGS, REGISTRY, CREDENTIALS, SHARED DRIVES, RAM.</span>',
+            '<span class="info">ADDITIONAL DATA: NETWORK MAPS, SECURITY CONFIGS, ACTIVE PROCESSES.</span>',
+            '',
+            '<span class="info">SYSTEM INFECTION STATUS: KEYLOGGER, ROOTKIT, TRACKING, CAM/MIC, BIOS BOOTKIT, ZERO-DAY, C2, EDR/XDR BYPASS, LATERAL MOVEMENT, PRIVILEGE ESCALATION.</span>',
+            '',
+            'ANOMALY_DETECTION     : <span class="success">ZERO FOOTPRINT LEFT</span>',
+            'COMPROMISE_LEVEL      : <span class="error">TOTAL SYSTEM TAKEOVER</span>',
+            '-----------------------------------------------------------------',
+            '',
+            '<span class="error">*** TARGET SYSTEM OFFLINE. SESSION TERMINATED. ***</span>',
+            '<span class="dim">AETOS CYBERNETICS :: MISSION COMPLETE. EXITING.</span>'
+        ], 80); /* Slower log out for final summary */
+
+        await sleep(7000); /* MUCH LONGER PAUSE HERE before final BSOD */
+
+        /* Trigger BSOD */
+        term.output.innerHTML = ''; /* Clear terminal content */
+        term.crtContainer.style.filter = 'none'; /* Remove any filters to ensure full blue */
+        term.crtContainer.style.animation = 'none'; /* Stop all CRT container animations */
+        document.body.classList.remove('glitch-active', 'power-outage'); /* Ensure body classes are clean */
+        document.body.style.backgroundColor = '#0000AA'; /* Set body to BSOD blue */
+        term.scanlineOverlay.style.opacity = '0'; /* Hide scanlines for clean BSOD */
+        if (document.getElementById('matrix-overlay')) {
+             document.getElementById('matrix-overlay').style.opacity = '0'; /* Hide matrix */
+        }
+        if (document.getElementById('vignette-overlay')) {
+            document.getElementById('vignette-overlay').style.opacity = '0'; /* Hide vignette */
+        }
+        
+        await scrollLog([
+            '',
+            '*** STOP: 0x000000FE (0x00000008, 0x00000005, 0x89C13000, 0x00000000)',
+            '*** AN UNEXPECTED ERROR HAS OCCURRED. SYSTEM INTEGRITY COMPROMISED. ***',
+            '',
+            'Your system has been infected due to a critical vulnerability.',
+            'Data exfiltration successful. Remote control established.',
+            'Access to all personal files, webcams, and microphones confirmed.',
+            '',
+            'Please restart your computer.',
+            'Note: This restart will not undo the compromise.',
+            '',
+            'For more information, visit: EPICFRAUDS.COM',
+            'Error Code: JOKER_BREACH_0F88',
+            '',
+            'Initializing system dump to capture remaining volatile data...',
+            'Memory dump in progress... Please wait.',
+            'The system will restart automatically after the dump completes.',
+            '',
+            '*** DO NOT ATTEMPT TO POWER OFF YOUR DEVICE ***'
+        ], 40); /* Slightly slower text for BSOD */
+
+        /* Optional: Add a final system reboot/power off sound here */
+        playSound('powerDown', 'C0', '4s'); /* Deep, long tone */
+
+        /* Disable further interaction */
+        document.removeEventListener('mousemove', (e) => {});
+        document.removeEventListener('keydown', handleKeypress);
+        if (synths.hum) synths.hum.stop();
+        term.customCursor.style.display = 'none';
+    }
+
+    function handleKeypress(e) {
+        if (!audioEnabled) { setupAudio(); } else { playSound('processingBeep'); } /* Use processing beep */
+    }
+
+    /* THIS IS THE ENTRY POINT FOR takeOVER.HTML */
+    window.onload = startCompromiseSequence;
+    document.addEventListener('keydown', handleKeypress);
+    document.body.addEventListener('mousedown', setupAudio, {once:true});
+</script>
+</body>
+</html>
