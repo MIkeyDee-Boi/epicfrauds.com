@@ -5,7 +5,6 @@
     <title>EREBUS INITIATIVE :: M.I.N.D. Honeypot Interface</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <style>
         /*
          * EPICFRAUDS.COM // JUSTICE, EXPOSED.
@@ -16,7 +15,7 @@
          */
 
         :root {
-            --bg-color: #0000AA; /* Windows Blue Screen Blue */
+            --bg-color: #0000AA; /* Original Windows Blue Screen Blue - will be overridden for BSOD */
             --scanline-color: rgba(255, 255, 255, 0.1); /* White scanlines on blue */
             --glow-color: rgba(170, 255, 255, 0.8); /* Light blue/cyan glow */
             --text-color: #FFFFFF; /* White text */
@@ -28,7 +27,6 @@
             --crash-glow-color: rgba(255, 255, 255, 0.9);
             --matrix-color: rgba(170, 255, 255, 0.1); /* Subtle matrix rain blue */
             --matrix-char-color: rgba(170, 255, 255, 0.6); /* Brighter matrix characters */
-            --cursor-trail-color: rgba(255, 255, 255, 0.3); /* White transparent trail - NOT USED */
         }
 
         html, body {
@@ -44,6 +42,10 @@
             user-select: none;
             -webkit-font-smoothing: antialiased;
             text-rendering: optimizeLegibility;
+            display: flex; /* Use flexbox for centering BSOD content */
+            justify-content: center;
+            align-items: center;
+            flex-direction: column; /* Stack items vertically */
         }
 
         #crt-container {
@@ -248,6 +250,72 @@
             font-size: 10px; color: rgba(255, 255, 255, 0.1); padding: 20px; white-space: pre-wrap;
             user-select: text; cursor: default; text-transform: none;
         }
+
+        /* BSOD Specific Styles */
+        .bsod-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Center vertically */
+            align-items: flex-start; /* Align text to the left */
+            width: 100vw;
+            height: 100vh;
+            background-color: #0078D7; /* Windows Blue Screen Blue */
+            color: #FFFFFF;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* More Windows-like font */
+            padding: 5vw; /* Responsive padding */
+            text-transform: none; /* No uppercase for BSOD text */
+            letter-spacing: normal; /* Normal letter spacing */
+            text-shadow: none; /* No text shadow for clean look */
+            overflow: hidden; /* Ensure no scrollbars on BSOD */
+        }
+
+        .bsod-emoticon {
+            font-size: 15vw; /* Large and responsive */
+            line-height: 1;
+            margin-bottom: 0.2em;
+        }
+
+        .bsod-message {
+            font-size: 2vw; /* Responsive font size */
+            line-height: 1.4;
+            margin-bottom: 2em;
+            max-width: 80%; /* Don't stretch too wide */
+        }
+
+        .bsod-percentage { /* This will be hidden in the new version */
+            font-size: 1.8vw;
+            margin-bottom: 4em;
+        }
+
+        .bsod-info-block { /* This will be hidden in the new version */
+            display: flex;
+            align-items: flex-start;
+            gap: 2vw; /* Space between QR and text */
+        }
+
+        .bsod-qr-code { /* This will be hidden in the new version */
+            width: 10vw; /* Responsive QR code size */
+            height: 10vw;
+            background-color: #FFFFFF; /* White background for QR code */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0.5vw;
+        }
+        .bsod-qr-code img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .bsod-details { /* This will be hidden in the new version */
+            font-size: 1.2vw;
+            line-height: 1.5;
+        }
+        .bsod-details a {
+            color: #FFFFFF;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -265,7 +333,10 @@
     </div>
 </div>
 
-<div id="custom-cursor">></div> <div id="hidden-disclaimer">
+<div id="custom-cursor">></div> <!-- Custom arrow cursor -->
+
+
+<div id="hidden-disclaimer">
     <p>
         -------------------------------------------------------------<br>
         ATTENTION! YOU HAVE STUMBLED UPON EPICFRAUDS.COM!<br>
@@ -358,15 +429,13 @@
         crtContainer: document.getElementById('crt-container'),
         scanlineOverlay: document.getElementById('scanline-overlay'),
         customCursor: document.getElementById('custom-cursor'),
-        jokerOverlay: document.getElementById('joker-overlay')
+        jokerOverlay: document.getElementById('joker-overlay'),
+        matrixOverlay: document.getElementById('matrix-overlay') // Added matrix overlay reference
     };
     const sleep = ms => new Promise(r => setTimeout(r, ms));
     let mouseJitterInterval = null;
 
     // --- Custom Flashing Arrow Cursor Logic ---
-    // Removed mouse trail as it clashes with the arrow concept
-    document.removeEventListener('mousemove', (e) => {}); // Ensure previous mousemove is unbound
-
     function startMouseJitter() {
         document.body.classList.add('mouse-jitter');
         const jitterRange = 150; // Increased range for more erratic movement
@@ -599,11 +668,11 @@
         ], 'accent ascii-3d', 30); await sleep(50);
 
         await showAscii([
-            "    JOKER",
-            "    HOAX_WEBSITE",
-            "  PRANKYOURFRIENDS",
-            "    REASONTODANCE",
-            "    TROPICALFRUITSMOOTHIE"
+            "    0 1 0 0 1 1",
+            "    1 0 1 1 0 1 0",
+            "  0 1 0 1 0 1 1 0",
+            "    1 0 1 0 0 1 0",
+            "    0 1 1 1 0 1"
         ], 'accent ascii-3d', 30); await sleep(50);
 
         await scrollLog([
@@ -711,10 +780,10 @@
         await triggerGlitch(160);
         
         await scrollLog([
-            'SENDING VISITOR_WINDOWS_LOGS TO EPICFRAUDS.COM... [OK]',
-            'SENDING VISITOR SYSTEM_REPORT TO EPICFRAUDS.COM... [OK]',
-            'SENDING SENDING VISITOR FILE-INDEX TO EPICFRAUDS.COM... [OK]',
-            'SENDING CAMERA_MICROPHONE CLIPS REPORT EPICFRAUDS.COM... [OK]',
+            'SENDING CLASSIFIED_REPORT_1 TO HQ... [OK]',
+            'SENDING CLASSIFIED_REPORT_2 TO HQ... [OK]',
+            'SENDING CLASSIFIED_REPORT_3 TO HQ... [OK]',
+            'SENDING CLASSIFIED_REPORT_4 TO HQ... [OK]',
             'SENDING CLASSIFIED_REPORT_5 TO HQ... [OK]',
             'SENDING CLASSIFIED_REPORT_6 TO HQ... [OK]',
         ], 10); // Faster report sending
@@ -796,7 +865,7 @@
             '<span class="dim">- ZERO-TRUST NETWORK ARCHITECTURE BYPASS</span>',
             '<span class="dim">- SUPPLY CHAIN COMPROMISE VIA SDN</span>',
             '<span class="dim">- AI-DRIVEN POLYMORPHIC MALWARE</span>',
-            '<span class="dim">- HARDWARE-LEVEL BACKDOOR ACTIVATION (ME/PSP EXPLOIT)</span>',
+            '<span class="dim">- HARDWARE-LEVEL BACKDOOR ACTIVATION (ME/PSP EXPLOITATION)</span>',
             '<span class="dim">- NEURAL NETWORK RECONFIGURATION FOR DRONE CONTROL</span>',
             '<span class="dim">- GRAVITATIONAL WAVE COMMUNICATION INTERCEPT MODULE</span>',
             '<span class="dim">- QUANTUM-RESISTANT ENCRYPTION SUBVERSION</span>',
@@ -814,44 +883,62 @@
         await sleep(8000); /* MUCH LONGER PAUSE HERE before BSOD */
 
         /* Trigger BSOD */
-        term.output.innerHTML = ''; /* Clear terminal content */
-        term.crtContainer.style.filter = 'none'; /* Remove any filters to ensure full blue */
-        term.crtContainer.style.animation = 'none'; /* Stop all CRT container animations */
-        document.body.classList.remove('glitch-active', 'power-outage'); /* Ensure body classes are clean */
-        term.scanlineOverlay.style.opacity = '0'; /* Hide scanlines for clean BSOD */
-        document.body.style.cursor = 'default'; /* Show default cursor */
-        
-        await scrollLog([
-            '',
-            '*** STOP: 0x000000FE (0x00000008, 0x00000005, 0x89C13000, 0x00000000)',
-            '*** AN UNEXPECTED ERROR HAS OCCURRED. SYSTEM INTEGRITY COMPROMISED. ***',
-            '',
-            'Your system has been infected due to a critical vulnerability.',
-            'Data exfiltration successful. Remote control established.',
-            'Access to all personal files, webcams, and microphones confirmed.',
-            '',
-            'Please restart your computer.',
-            'Note: This restart will not undo the compromise.',
-            '',
-            'For more information, visit: EPICFRAUDS.COM',
-            'Error Code: JOKER_BREACH_0F88',
-            '',
-            'Initializing system dump to capture remaining volatile data...',
-            'The Epic Frauds website is for entertainment only.',
-            'Memory dump in progress... Please wait.',
-            'The system will restart automatically after the dump completes.',
-            '',
-            '*** DO NOT ATTEMPT TO POWER OFF YOUR DEVICE ***'
-        ], 30); /* Faster text for BSOD */
+        // Hide all existing overlays and terminal content
+        term.output.innerHTML = '';
+        term.crtContainer.style.display = 'none';
+        term.scanlineOverlay.style.display = 'none';
+        term.vignetteOverlay.style.display = 'none';
+        term.matrixOverlay.style.display = 'none';
+        term.jokerOverlay.style.display = 'none';
+        stopMouseJitter(); // Ensure custom cursor is hidden
 
-        /* Optional: Add a final system reboot/power off sound here */
-        playSound('powerDown', null, '4s'); /* Deep, long static tone */
+        // Set body background and styles for BSOD
+        document.body.style.backgroundColor = '#0078D7'; /* Windows Blue */
+        document.body.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+        document.body.style.color = '#FFFFFF';
+        document.body.style.textTransform = 'none';
+        document.body.style.letterSpacing = 'normal';
+        document.body.style.justifyContent = 'flex-start'; /* Align content to start for BSOD */
+        document.body.style.alignItems = 'flex-start'; /* Align content to start for BSOD */
+        document.body.style.padding = '5vw'; /* Responsive padding */
 
-        /* Disable further interaction */
-        document.removeEventListener('mousemove', (e) => {});
-        document.removeEventListener('keydown', handleKeypress);
-        if (synths.hum) synths.hum.stop();
-        term.customCursor.style.display = 'none';
+        // Create BSOD content
+        const bsodContent = document.createElement('div');
+        bsodContent.classList.add('bsod-container');
+        bsodContent.innerHTML = `
+            <div class="bsod-emoticon">:(</div>
+            <div class="bsod-message">
+                Your PC ran into a problem and needs to restart. We're<br>
+                just collecting some error info, and then we'll restart for you. (<span id="bsod-percent">0%</span> complete)
+            </div>
+            <div class="bsod-details-bottom">
+                If you'd like to know more, you can search online later for this error <span class="stop-code">PDP_DETECTED_FATAL_ERROR</span>
+            </div>
+        `;
+        document.body.innerHTML = ''; // Clear everything from body
+        document.body.appendChild(bsodContent); // Add BSOD content
+
+        const percentageElement = document.getElementById('bsod-percent'); // Get element by ID
+        let percentage = 0;
+        const percentageInterval = setInterval(() => {
+            percentage += 1;
+            if (percentage <= 100) {
+                percentageElement.textContent = `${percentage}%`;
+            } else {
+                clearInterval(percentageInterval);
+            }
+        }, 50); // Increment every 50ms
+
+        // Stop all audio after a short delay to let the initial static burst play
+        setTimeout(() => {
+            if (synths.hum) synths.hum.stop();
+            // Stop other synths if they are still playing
+            for (const key in synths) {
+                if (synths[key] && synths[key].state === 'started') {
+                    synths[key].stop();
+                }
+            }
+        }, 1000); // Stop audio after 1 second
     }
 
     function handleKeypress(e) {
