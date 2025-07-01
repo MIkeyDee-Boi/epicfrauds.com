@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>EREBUS INITIATIVE :: M.I.N.D. Honeypot Interface</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=sw
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <style>
         /*
@@ -28,7 +28,7 @@
             --crash-glow-color: rgba(255, 255, 255, 0.9);
             --matrix-color: rgba(170, 255, 255, 0.1); /* Subtle matrix rain blue */
             --matrix-char-color: rgba(170, 255, 255, 0.6); /* Brighter matrix characters */
-            --cursor-trail-color: rgba(255, 255, 255, 0.3); /* White transparent trail */
+            --cursor-trail-color: rgba(255, 255, 255, 0.3); /* White transparent trail - NOT USED */
         }
 
         html, body {
@@ -38,7 +38,7 @@
             font-size: 16px;
             margin: 0; padding: 0;
             overflow: hidden;
-            cursor: none;
+            cursor: none; /* Hide default cursor */
             text-transform: uppercase;
             letter-spacing: 0.05em;
             user-select: none;
@@ -53,7 +53,6 @@
             background: radial-gradient(ellipse at center, rgba(170,255,255,0.05) 0%, transparent 70%);
             box-shadow: inset 0 0 50px rgba(170, 255, 255, 0.2);
             animation: text-flicker 2.5s linear infinite alternate;
-            /* Removed border-radius and transform for flat screen */
         }
 
         /* Glitch Effect */
@@ -151,7 +150,7 @@
         #terminal::before { background-color: rgba(255, 0, 0, 0.02); transform: translate(-1px, -1px); }
         #terminal::after { background-color: rgba(0, 0, 255, 0.02); transform: translate(1px, 1px); }
 
-        .cursor {
+        .cursor { /* Not used for the custom cursor effect anymore, keeping for blink effect if needed elsewhere */
             display: inline-block; background-color: var(--text-color);
             box-shadow: 0 0 12px var(--glow-color); width: 12px; height: 20px;
             animation: blink 0.7s step-end infinite; margin-left: 6px; vertical-align: bottom;
@@ -187,19 +186,21 @@
             text-shadow: 3px 3px 10px rgba(170, 255, 255, 0.4); display: block; line-height: 1;
         }
 
-        /* Mouse effects */
-        .mouse-trail {
-            position: absolute; background-color: var(--cursor-trail-color); border-radius: 50%;
-            pointer-events: none; opacity: 0; transform: scale(0); animation: fadeOutTrail 0.5s forwards;
-            box-shadow: 0 0 5px var(--cursor-trail-color); z-index: 100; width: 10px; height: 10px;
-        }
-        @keyframes fadeOutTrail { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(2); } }
-        body.mouse-jitter { cursor: none !important; }
-        body.mouse-jitter #custom-cursor { transition: transform 0.01s ease-out; }
+        /* Custom Flashing Arrow Cursor */
         #custom-cursor {
-            position: fixed; width: 16px; height: 16px; background-color: var(--text-color); border-radius: 50%;
-            box-shadow: 0 0 10px var(--glow-color), 0 0 20px rgba(170, 255, 255, 0.5); pointer-events: none;
-            z-index: 99; transform: translate(-50%, -50%);
+            position: fixed;
+            font-size: 2em; /* Make it visible */
+            color: var(--accent-color); /* Yellow arrow */
+            text-shadow: 0 0 10px var(--accent-color), 0 0 20px rgba(255, 255, 0, 0.5);
+            pointer-events: none;
+            z-index: 99;
+            transform: translate(-50%, -50%);
+            animation: cursor-flicker 0.15s step-end infinite alternate; /* Flashing effect */
+        }
+
+        @keyframes cursor-flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
         }
 
         /* Joker ASCII Overlay */
@@ -264,8 +265,7 @@
     </div>
 </div>
 
-
-<div id="hidden-disclaimer">
+<div id="custom-cursor">></div> <div id="hidden-disclaimer">
     <p>
         -------------------------------------------------------------<br>
         ATTENTION! YOU HAVE STUMBLED UPON EPICFRAUDS.COM!<br>
@@ -303,34 +303,37 @@
         if (audioEnabled) return;
         try {
             Tone.start();
-            synths.keypress = new Tone.MembraneSynth({ oscillator: { type: 'sine' }, envelope: { attack: 0.001, decay: 0.05, sustain: 0.01, release: 0.05 }, volume: -20 }).toDestination();
-            synths.success = new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.5 }, volume: -10 }).toDestination();
-            synths.error = new Tone.Synth({ oscillator: { type: 'sawtooth' }, envelope: { attack: 0.01, decay: 0.1, sustain: 0.05, release: 0.2 }, volume: -10 }).toDestination();
+            // Adjusted sounds for more static/buzzing, less "beep"
+            synths.keypress = new Tone.NoiseSynth({ noise: { type: 'pink' }, envelope: { attack: 0.005, decay: 0.08, sustain: 0.01, release: 0.05 }, volume: -25 }).toDestination();
+            synths.success = new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 0.01, decay: 0.1, sustain: 0.05, release: 0.3 }, volume: -15 }).toDestination(); // Still a synth, but softer
+            synths.error = new Tone.NoiseSynth({ noise: { type: 'brownian' }, envelope: { attack: 0.01, decay: 0.2, sustain: 0.05, release: 0.3 }, volume: -12 }).toDestination(); // More harsh error
             
-            synths.hum = new Tone.AMOscillator('F#1', 'sine', 'square').toDestination();
-            synths.hum.volume.value = -15; /* Louder hum */
+            // Core hum/static for background
+            synths.hum = new Tone.Noise('white').toDestination(); // Use white noise for static
+            synths.hum.volume.value = -20; // Volume for static
             synths.hum.start();
 
-            const humLFO = new Tone.LFO(20, -1, 1); /* Faster LFO, more depth for jitter */
-            humLFO.connect(synths.hum.detune);
-            humLFO.start();
+            // Modulate the static for a "radio tuning" effect
+            const staticLFO = new Tone.LFO(5, -5, 5); // Faster LFO for static intensity fluctuation
+            staticLFO.connect(synths.hum.volume);
+            staticLFO.start();
 
-            synths.alert = new Tone.PluckSynth({ attackNoise: 1, dampening: 4000, resonance: 0.7, volume: -12 }).toDestination();
-            synths.scan = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.005, decay: 0.1, sustain: 0.02, release: 0.1 }, volume: -15 }).toDestination();
-            synths.confirm = new Tone.MembraneSynth({ pitchDecay: 0.08, octaves: 6, envelope: { attack: 0.001, decay: 0.3, sustain: 0.05, release: 0.3 }, volume: -10 }).toDestination();
-            synths.glitch = new Tone.NoiseSynth({ noise: { type: 'brownian' }, envelope: { attack: 0.001, decay: 0.05, sustain: 0.01, release: 0.05 }, volume: -20 }).toDestination();
+            synths.alert = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.3, sustain: 0, release: 0.3 }, volume: -10 }).toDestination(); // Alert is a static burst
+            synths.scan = new Tone.NoiseSynth({ noise: { type: 'pink' }, envelope: { attack: 0.005, decay: 0.1, sustain: 0.02, release: 0.1 }, volume: -18 }).toDestination();
+            synths.confirm = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.2, sustain: 0.01, release: 0.2 }, volume: -15 }).toDestination(); // Confirmation is a sharper static
+            synths.glitch = new Tone.NoiseSynth({ noise: { type: 'brownian' }, envelope: { attack: 0.001, decay: 0.05, sustain: 0.01, release: 0.05 }, volume: -18 }).toDestination();
             
             synths.staticBurst = new Tone.NoiseSynth({
                 noise: { type: 'white' },
-                envelope: { attack: 0.001, decay: 0.3, sustain: 0, release: 0.3 },
-                volume: -10
-            }).toDestination();
-            synths.powerDown = new Tone.MembraneSynth({
-                pitchDecay: 0.2, octaves: 10, envelope: { attack: 0.001, decay: 0.8, sustain: 0.01, release: 0.5 }, volume: -5
-            }).toDestination();
-            synths.powerUp = new Tone.MembraneSynth({
-                pitchDecay: 0.2, octaves: 10, envelope: { attack: 0.001, decay: 0.8, sustain: 0.01, release: 0.5 }, volume: -5
-            }).toDestination();
+                envelope: { attack: 0.001, decay: 0.5, sustain: 0, release: 0.5 },
+                volume: -8
+            }).toDestination(); // Louder static burst
+            synths.powerDown = new Tone.NoiseSynth({
+                noise: { type: 'white' }, envelope: { attack: 0.001, decay: 1.5, sustain: 0.01, release: 1.5 }, volume: -5
+            }).toDestination(); // Long static fade out
+            synths.powerUp = new Tone.NoiseSynth({
+                noise: { type: 'white' }, envelope: { attack: 0.001, decay: 1.5, sustain: 0.01, release: 1.5 }, volume: -5
+            }).toDestination(); // Long static fade in
 
             audioEnabled = true;
         } catch (e) {
@@ -343,11 +346,8 @@
         if (!audioEnabled) return;
         try {
             if (synths[sound]) {
-                if (sound === 'keypress' || sound === 'scan' || sound === 'glitch' || sound === 'staticBurst' || sound === 'powerDown' || sound === 'powerUp') {
-                    synths[sound].triggerAttackRelease(duration);
-                } else {
-                    synths[sound].triggerAttackRelease(note, duration);
-                }
+                // All sounds now use triggerAttackRelease for noise synths
+                synths[sound].triggerAttackRelease(duration);
             }
         } catch (e) { console.warn("Audio playback failed for", sound, ":", e); }
     }
@@ -355,50 +355,42 @@
     // --- Terminal Logic ---
     const term = {
         output: document.getElementById('output'),
-        /* inputLine, prompt, input, cursor are not used as part of takeover.html's direct load */
         crtContainer: document.getElementById('crt-container'),
         scanlineOverlay: document.getElementById('scanline-overlay'),
         customCursor: document.getElementById('custom-cursor'),
-        jokerOverlay: document.getElementById('joker-overlay') /* Reference to Joker overlay */
+        jokerOverlay: document.getElementById('joker-overlay')
     };
     const sleep = ms => new Promise(r => setTimeout(r, ms));
     let mouseJitterInterval = null;
 
-    // --- Mouse Trail Effect ---
-    document.addEventListener('mousemove', (e) => {
-        if (term.customCursor) {
-            term.customCursor.style.left = `${e.clientX}px`;
-            term.customCursor.style.top = `${e.clientY}px`;
-        }
-        const trail = document.createElement('div');
-        trail.classList.add('mouse-trail');
-        trail.style.left = `${e.clientX}px`;
-        trail.style.top = `${e.clientY}px`;
-        document.body.appendChild(trail);
-        trail.addEventListener('animationend', () => {
-            trail.remove();
-        });
-    });
+    // --- Custom Flashing Arrow Cursor Logic ---
+    // Removed mouse trail as it clashes with the arrow concept
+    document.removeEventListener('mousemove', (e) => {}); // Ensure previous mousemove is unbound
 
-    // --- Mouse Jitter Effect Functions ---
     function startMouseJitter() {
         document.body.classList.add('mouse-jitter');
-        const jitterAmount = 100; /* Much crazier jitter */
-        const intervalTime = 5; /* Even faster updates */
+        const jitterRange = 150; // Increased range for more erratic movement
+        const intervalTime = 10; // Faster updates
+
         mouseJitterInterval = setInterval(() => {
             if (term.customCursor) {
-                const offsetX = (Math.random() - 0.5) * jitterAmount * 2;
-                const offsetY = (Math.random() - 0.5) * jitterAmount * 2;
-                term.customCursor.style.transform = `translate(-50%, -50%) translate(${offsetX}px, ${offsetY}px)`;
+                const mouseX = Math.random() * window.innerWidth;
+                const mouseY = Math.random() * window.innerHeight;
+                term.customCursor.style.left = `${mouseX}px`;
+                term.customCursor.style.top = `${mouseY}px`;
             }
         }, intervalTime);
     }
+
     function stopMouseJitter() {
         clearInterval(mouseJitterInterval);
         mouseJitterInterval = null;
         document.body.classList.remove('mouse-jitter');
         if (term.customCursor) {
-            term.customCursor.style.transform = `translate(-50%, -50%)`;
+            term.customCursor.style.animation = 'none'; // Stop flashing
+            term.customCursor.style.opacity = '0'; // Hide cursor
+            term.customCursor.style.left = '-100px'; // Move off-screen
+            term.customCursor.style.top = '-100px';
         }
     }
 
@@ -420,23 +412,60 @@
         }
     }
 
-    async function getVisitorData() { /* Simplified for brevity, same as previous */
+    async function getVisitorData() {
         const data = {};
-        data.ua = navigator.userAgent; data.platform = navigator.platform; data.language = navigator.language;
+        data.ua = navigator.userAgent;
+        data.platform = navigator.platform;
+        data.language = navigator.language;
         data.screen = `${window.screen.width}x${window.screen.height}x${window.screen.colorDepth}`;
-        data.os = (ua => ua.includes("Win") ? "WINDOWS NT" : ua.includes("Mac") ? "DARWIN/MACOS" : ua.includes("Linux") ? "LINUX KERNEL" : "UNKNOWN")(data.ua);
-        data.browser = (ua => ua.includes("Firefox") ? "FIREFOX" : ua.includes("Chrome") ? "CHROMIUM-BASED" : ua.includes("Safari") ? "WEBKIT/SAFARI" : "GENERIC")(data.ua);
+        data.os = (ua => {
+            if (ua.includes("Win")) return "WINDOWS NT";
+            if (ua.includes("Mac")) return "DARWIN/MACOS";
+            if (ua.includes("Linux")) return "LINUX KERNEL";
+            if (ua.includes("Android")) return "ANDROID OS";
+            if (ua.includes("iOS")) return "APPLE iOS";
+            return "UNKNOWN";
+        })(data.ua);
+        data.browser = (ua => {
+            if (ua.includes("Firefox")) return "FIREFOX QUANTUM";
+            if (ua.includes("Chrome") && !ua.includes("Edge")) return "CHROMIUM-BASED (CHROME)";
+            if (ua.includes("Edge")) return "CHROMIUM-BASED (EDGE)";
+            if (ua.includes("Safari") && !ua.includes("Chrome")) return "WEBKIT/SAFARI";
+            if (ua.includes("Opera") || ua.includes("OPR")) return "OPERA BROWSER";
+            return "GENERIC BROWSER";
+        })(data.ua);
         data.cores = navigator.hardwareConcurrency || 'N/A';
-        try { /* Stubbed out actual API call for brevity */
-            data.ip = '192.168.1.100'; data.org = 'UNRESOLVED'; data.location = 'UNDEFINED'; data.vpn = false;
-            data.lat = 'N/A'; data.lon = 'N/A';
+        data.vendor = navigator.vendor || 'N/A';
+
+        // Additional simulated data for a richer profile
+        data.plugins = Array.from(navigator.plugins).map(p => p.name).join(', ') || 'NONE DETECTED';
+        data.doNotTrack = navigator.doNotTrack === '1' ? 'ENABLED' : 'DISABLED';
+        
+        // Stubs for real-time external data (simulated for prank)
+        try {
+            // Simulated IP data, replace with actual API call if you host this
+            const ipApiResponse = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipApiResponse.json();
+            data.ip = ipData.ip;
+
+            // Simulated geo-location data (for privacy, we won't use real geo-location)
+            data.location = `FRANCONIA, VIRGINIA, UNITED STATES`; // Based on current context
+            data.org = 'VIRGINIA TELECOMMUNICATIONS INC.';
+            data.isp = 'COMCAST CABLE';
+            data.vpn = Math.random() > 0.8 ? 'DETECTED' : 'NONE'; // Randomly detect VPN
         } catch (e) {
-            console.warn("Geolocation API failed:", e); data.ip = '0.0.0.0'; data.org = 'UNRESOLVED'; data.location = 'UNDEFINED'; data.vpn = true; data.lat = 'N/A'; data.lon = 'N/A';
+            console.warn("Real IP/Geolocation API failed (simulating):", e);
+            data.ip = '192.168.1.100'; // Fallback to a common local IP if API fails
+            data.location = 'UNRESOLVED (LOCAL NETWORK)';
+            data.org = 'UNKNOWN_ISP';
+            data.isp = 'LOCAL_NETWORK_PROVIDER';
+            data.vpn = 'POSSIBLE (NETWORK OBSCURATION)';
         }
         return data;
     }
 
-    async function scrollLog(lines, delay = 50) { // Increased default delay for slower scrolling
+
+    async function scrollLog(lines, delay = 20) { // Default delay for readability
         for (const line of lines) {
             term.output.innerHTML += `<span>${line}</span>\n`;
             term.output.parentElement.scrollTop = term.output.parentElement.scrollHeight;
@@ -444,7 +473,7 @@
         }
     }
 
-    async function showAscii(asciiLines, className = 'accent', delay = 100) { // Increased default delay
+    async function showAscii(asciiLines, className = 'accent', delay = 50) {
         for(const line of asciiLines) {
             term.output.innerHTML += `<span class="${className}">${line}</span>\n`;
             term.output.parentElement.scrollTop = term.output.parentElement.scrollHeight;
@@ -460,12 +489,14 @@
         const fill = container.querySelector('.progress-bar-fill');
         const timeSpan = container.querySelector('.progress-time');
         term.output.parentElement.scrollTop = term.output.parentElement.scrollHeight;
-        playSound('scan', 'C3', '32n'); await sleep(50); // Faster sound during progress
-        fill.style.width = '100%'; await sleep(duration);
-        playSound('confirm', 'C6', '64n');
+        playSound('scan', 'C3', '64n'); // Faster scan sound
+        await sleep(50); // Small initial delay
+        fill.style.width = '100%'; 
+        await sleep(duration);
+        playSound('confirm', 'C6', '128n'); // Sharper confirm sound
         const endTime = performance.now(); const timeTaken = ((endTime - startTime) / 1000).toFixed(2);
         timeSpan.textContent = ` (${timeTaken}s)`;
-        await scrollLog(['<span class="success">COMPLETE.</span>'], 10); // Faster completion message
+        await scrollLog(['<span class="success">COMPLETE.</span>'], 5); // Very fast completion message
     }
 
     async function triggerGlitch(duration = 500) {
@@ -489,22 +520,21 @@
         playSound('powerUp', 'C6', '0.5s');
     }
 
-    /* New Joker Flash Function */
     async function flashJokerMask(duration = 1000) {
-        if (!term.jokerOverlay) { /* Ensure element exists */
+        if (!term.jokerOverlay) {
             console.warn("Joker overlay not found. Skipping flash.");
             return;
         }
         term.jokerOverlay.classList.remove('hidden');
         term.jokerOverlay.classList.add('show');
-        playSound('alert', 'A4', '0.2s'); /* A sharp, quick alert sound */
+        playSound('alert', null, '0.5s'); // Static alert
         await sleep(duration);
         term.jokerOverlay.classList.remove('show');
         term.jokerOverlay.classList.add('hidden');
     }
 
-    async function rapidIpScan(baseIp, count = 40, delay = 50) { // Increased delay for slower scan
-        await scrollLog(['<span class="info">NETWORK INFECTION: LATERAL MOVEMENT...</span>'], 50);
+    async function rapidIpScan(baseIp, count = 40, delay = 10) {
+        await scrollLog(['<span class="info">NETWORK INFECTION: LATERAL MOVEMENT...</span>'], 15);
         const ipParts = baseIp.split('.'); const base = ipParts.slice(0, 3).join('.');
         for (let i = 0; i < count; i++) {
             const randomLastOctet = Math.floor(Math.random() * 254) + 1;
@@ -512,42 +542,41 @@
             const status = Math.random() > 0.3 ? '<span class="success">[COMPROMISED]</span>' : '<span class="warning">[DENIED]</span>';
             term.output.innerHTML += `<span>  > ACCESS: ${currentIp} ${status}</span>\n`;
             term.output.parentElement.scrollTop = term.output.parentElement.scrollHeight;
-            playSound('keypress', null, '32n'); await sleep(delay);
+            playSound('keypress', null, '64n'); await sleep(delay); // Rapid static for scan
         }
-        await scrollLog(['<span class="success">LATERAL MOVEMENT COMPLETE.</span>'], 50);
+        await scrollLog(['<span class="success">LATERAL MOVEMENT COMPLETE.</span>'], 15);
     }
 
     // --- Main Compromise Sequence ---
     async function startCompromiseSequence() {
-        // Setup initial state for this page (runs on load)
-        createMatrixRain(); /* Starts Matrix Rain for the takeover page */
-        setupAudio(); /* Starts audio context and hum */
+        createMatrixRain();
+        setupAudio();
         
         const d = await getVisitorData();
         window.visitor_data = d;
 
-        await scrollLog([ /* Condensed BIOS/Boot logs */
+        await scrollLog([
             'BIOS INITIALIZING...',
             'MEMORY: 4096GB DDR6 ECC, CPU: XEON E8-9590 vPro, CORES: 192',
             'FIRMWARE: VERIFIED',
             'SECURE BOOT: ENABLED',
             'AETOS CYBERNETIC SYSTEMS',
-        ], 30); await sleep(500); // Slower initial log
-        await showAscii([ /* Condensed ASCII */
+        ], 10); await sleep(200);
+        await showAscii([
             "        _     _____ _______  ____ ",
             "       / \\   |_  _|__  /  \\ ",
             "      / _ \\    | |    / /| |",
             "     / ___ \\   | |   / /_| |",
             "    /_/   \\_\\  |_|  /____|_|"
-        ], 'info ascii-3d', 100); await sleep(200); // Slower ASCII reveal
-        await scrollLog([ /* Condensed Kernel/Filesystem */
+        ], 'info ascii-3d', 30); await sleep(50);
+        await scrollLog([
             'LOADING KERNEL... [LOADED]',
             'KERNEL INTEGRITY: [HASH MATCH]',
             'SYSTEMD: [ACTIVE]',
             'FSCK PASSED. INTEGRITY: [██████████████████] 100%'
-        ], 35); // Slower kernel log
-        await renderProgressBar('INITIALIZING CORE SYSTEM MODULES...', 800); await sleep(400); // Slower progress bar
-        await scrollLog([ /* Network/Auth details */
+        ], 15);
+        await renderProgressBar('INITIALIZING CORE SYSTEM MODULES...', 300); await sleep(100);
+        await scrollLog([
             'NETWORK: ACTIVE | FIREWALL: ONLINE',
             'SSH: SECURE',
             'REMOTE DESKTOP: CRITICAL',
@@ -558,16 +587,16 @@
             ` - VISITOR HASH: ${Math.random().toString(36).slice(2,10).toUpperCase()}`,
             ' - SECURITY CLEARANCE: TOP SECRET',
             ' - THREATS: NONE DETECTED'
-        ], 50); await sleep(1000); // Slower authentication log
+        ], 20); await sleep(300);
 
-        await showAscii([ /* Condensed ASCII */
+        await showAscii([
             "         ______ _____  _____ ",
             "        | ____|  __ \\| ____|",
             "        | |__  | |__) | |__ ",
             "        |  __| |  _  /|  __|",
             "        | |____| | \\ \\| |___",
             "        |______|__|  \\_\\______"
-        ], 'accent ascii-3d', 100); await sleep(200);
+        ], 'accent ascii-3d', 30); await sleep(50);
 
         await showAscii([
             "    0 1 0 0 1 1",
@@ -575,146 +604,204 @@
             "  0 1 0 1 0 1 1 0",
             "    1 0 1 0 0 1 0",
             "    0 1 1 1 0 1"
-        ], 'accent ascii-3d', 100); await sleep(200);
+        ], 'accent ascii-3d', 30); await sleep(50);
 
         await scrollLog([
             'INITIATING VISITOR DEVICE INTELLIGENCE ACQUISITION...',
             '<span class="dim">    (SYSTEM FINGERPRINTING & ENVIRONMENTAL SCAN...)</span>'
-        ], 40); // Slower initial scan message
-        await renderProgressBar('PERFORMING DEEP SCAN OF CLIENT ENVIRONMENT...', 1000); await sleep(500); // Slower scan progress
+        ], 20);
+        await renderProgressBar('PERFORMING DEEP SCAN OF CLIENT ENVIRONMENT...', 400); await sleep(80);
         
-        const visitor_data = window.visitor_data || await getVisitorData();
-        await scrollLog([ /* Visitor profile details */
+        await scrollLog([
             '-----------------------------------------------------',
             '| <span class="accent">VISITOR SYSTEM PROFILE / THREAT ASSESSMENT</span>      |',
             '-----------------------------------------------------',
-            `> IP_ADDRESS          : <span class="warning">${visitor_data.ip || '?'}</span>`,
-            `> GEO-LOCATION        : <span class="warning">${visitor_data.location || '?'}</span>`,
-            `> OS_PLATFORM         : <span class="info">${visitor_data.os}</span> / <span class="info">${visitor_data.platform}</span>`,
-            `> BROWSER_AGENT       : <span class="info">${visitor_data.browser}</span>`,
-            `> GPU                 : <span class="info">${visitor_data.gpu}</span>`,
+            `> IP_ADDRESS          : <span class="warning">${d.ip || '?'}</span>`,
+            `> ISP_PROVIDER        : <span class="info">${d.isp || '?'}</span>`,
+            `> GEO-LOCATION        : <span class="warning">${d.location || '?'}</span>`,
+            `> NETWORK_TYPE        : <span class="info">${d.vpn === 'DETECTED' ? 'VPN/PROXY' : 'DIRECT'}</span>`,
+            `> TIME_ZONE           : <span class="info">${Intl.DateTimeFormat().resolvedOptions().timeZone || '?'}</span>`,
+            `> LANGUAGE_PREF       : <span class="info">${d.language || '?'}</span>`,
+            `> OS_PLATFORM         : <span class="info">${d.os}</span> / <span class="info">${d.platform}</span>`,
+            `> BROWSER_AGENT       : <span class="info">${d.browser}</span>`,
+            `> SCREEN_RESOLUTION   : <span class="info">${d.screen || '?'}</span>`,
+            `> CPU_CORES           : <span class="info">${d.cores || '?'}</span>`,
+            `> INSTALLED_PLUGINS   : <span class="info">${d.plugins || '?'}</span>`,
+            `> DO_NOT_TRACK_FLAG   : <span class="info">${d.doNotTrack || '?'}</span>`,
+            `> VIRTUAL_ENV         : <span class="info">${d.vendor.includes('Google Inc.') && d.ua.includes('HeadlessChrome') ? 'POSSIBLE (VIRTUAL MACHINE)' : 'PHYSICAL (APPARENT)'}</span>`,
             '-----------------------------------------------------'
-        ], 80); 
-        await sleep(5000); // **PAUSE FOR 5 SECONDS AFTER ALL VISITOR INFO**
+        ], 35); 
+        await sleep(5000); // PAUSE FOR 5 SECONDS AFTER ALL VISITOR INFO
 
-        await scrollLog(['<span class="success">M.I.N.D. LINK ESTABLISHED. PROTOCOL SYNCHRONIZED.</span>', '<span class="success">PRIVILEGES: ROOT ACCESS [ADMINISTRATIVE CONTROL]</span>', ''], 80); // Slower link establishment
-        await scrollLog(['<span class="info">INITIATING HIGH-SPEED DATA EXFILTRATION & SYSTEM INFECTION...</span>'], 60); await sleep(800); // Slower exfiltration initiation
+        await scrollLog(['<span class="success">M.I.N.D. LINK ESTABLISHED. PROTOCOL SYNCHRONIZED.</span>', '<span class="success">PRIVILEGES: ROOT ACCESS [ADMINISTRATIVE CONTROL]</span>', ''], 25);
+        await scrollLog(['<span class="info">INITIATING HIGH-SPEED DATA EXFILTRATION & SYSTEM INFECTION...</span>'], 15); await sleep(200);
 
         term.scanlineOverlay.classList.add('intense-flicker');
+        term.customCursor.style.display = 'block'; // Show custom cursor
         startMouseJitter();
 
-        await rapidIpScan(visitor_data.ip || '192.168.1.1', 40, 20); await sleep(500); // Slower IP scan
-        await flashJokerMask(2000); /* Flash Joker after IP scan, longer duration */
-        await sleep(500); /* Pause after flash */
-        await triggerGlitch(300); // Added glitch
+        await rapidIpScan(d.ip || '192.168.1.1', 40, 5); await sleep(100); // Faster IP scan
+        await flashJokerMask(1000); // Faster Joker flash
+        await sleep(200);
+        await triggerGlitch(150); // Glitch after Joker
 
-        await renderProgressBar('ENCRYPTED TUNNEL ESTABLISHMENT: QUANTUM_SECURE_CHANNEL...', 800); // Faster progress
-        await scrollLog(['<span class="warning">DEPLOYING AUTONOMOUS TRACKING MODULE... [OK]</span>'], 30); await sleep(70); // Faster logging
-        await renderProgressBar('OS_LEVEL HOOK INJECTION: KERNEL_API_INTERCEPTION...', 900);
-        await scrollLog(['<span class="error">MEMORY DUMP INITIATED: VOLATILE_DATA_ACQUISITION... [LIVE]</span>'], 30); await sleep(70);
-        await triggerGlitch(200); // Added glitch
-        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/USER_PROFILES/DOCUMENTS.zip...', 1000);
-        await scrollLog(['<span class="info">EVADING EDR/XDR SYSTEMS: BEHAVIORAL_ANOMALY_BYPASS... [SUCCESS]</span>'], 30); await sleep(70);
-        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/USER_PROFILES/MULTIMEDIA_CACHE.zip...', 1200);
-        await scrollLog(['<span class="error">INJECTING ZERO-DAY EXPLOIT: "GHOST_SHELL_V2"... [ACTIVE]</span>'], 30); await sleep(70);
-        await triggerGlitch(250); // Added glitch
-        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/BROWSER_TEMP/HISTORY_LOGS.db...', 850);
-        await scrollLog(['<span class="warning">ESTABLISHING C2 CHANNEL: SECURE_BEACON_LINK... [ONLINE]</span>'], 30); await sleep(70);
-        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/OS_METADATA/EVENT_LOGS.dat...', 900);
-        await scrollLog(['<span class="info">ACTIVATING SENSOR NET: CAMERA & MICROPHONE FEEDS... [LIVE]</span>'], 30); await sleep(70);
-        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/OS_METADATA/REGISTRY_HIVECRYPT.enc...', 1100);
-        await scrollLog(['<span class="error">ROOTKIT DEPLOYMENT: "GHOST_KERNEL.SYS"... [INJECTED]</span>'], 30); await sleep(70);
-        await triggerGlitch(300); // Added glitch
-        await renderProgressBar('EXTRACTING SAVED CREDENTIALS (LEVEL-5 ENCRYPTION BREAK)...', 1300);
-        await scrollLog(['<span class="warning">INSTALLING PERSISTENT KEYLOGGER: AETOS_LOGGER_V7... [ACTIVATED]</span>'], 30); await sleep(70);
-        await renderProgressBar('ACCESSING CORE SYSTEM FILES (READ/WRITE OVERRIDE)...', 950);
-        await scrollLog(['<span class="info">INITIATING DATA WIPE PROTOCOL FOR TRACKS... [ACTIVE]</span>'], 30); await sleep(70);
-        await renderProgressBar('CAPTURING LIVE SCREENSHOT STREAM (ENCRYPTED_CHANNEL_9)...', 800);
-        await scrollLog(['<span class="error">BIOS PAYLOAD INJECTION: "PROMETHEUS_BOOTKIT"... [SUCCESS]</span>'], 30); await sleep(70);
-        await triggerGlitch(200); // Added glitch
-        await renderProgressBar('UPLOADING COMPROMISED DATA TO SECURE NODE: EREBUS-ALPHA-SERVER...', 1500);
-        await scrollLog(['<span class="info">ENUMERATING NETWORK SHARES: SMB_SCAN... [COMPLETE]</span>'], 30); await sleep(70);
-        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/OUTLOOK/ARCHIVE.pst...', 1100);
-        await scrollLog(['<span class="warning">BYPASSING MFA PROMPT: SESSION_HIJACK_TECHNIQUE... [EXEC]</span>'], 30); await sleep(70);
-        await renderProgressBar('ACCESSING CLOUD SYNCHRONIZED FOLDERS (ONEDRIVE/DROPBOX)...', 1200);
-        await scrollLog(['<span class="error">DATA EXFILTRATION: STEALTH_TUNNEL_PROTOCOL... [ACTIVE]</span>'], 30); await sleep(70);
-        await triggerGlitch(280); // Added glitch
-        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/WEB_CACHE/COOKIES.dat...', 700);
-        await scrollLog(['<span class="info">DEPLOYING PRIVILEGE ESCALATION EXPLOIT: "ELEVATE_X"... [SUCCESS]</span>'], 30); await sleep(70);
-        await renderProgressBar('SCANNING FOR CONNECTED USB DEVICES & MOUNTING...', 850);
-        await scrollLog(['<span class="warning">DISABLING SYSTEM RESTORE POINTS: RECOVERY_PREVENTION... [OK]</span>'], 30); await sleep(70);
-        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/USER_PROFILES/DESKTOP_SNAPSHOT.zip...', 950);
-        await scrollLog(['<span class="error">INJECTING PERSISTENT BACKDOOR: "SHADOW_GATE.DLL"... [COMPLETE]</span>'], 30); await sleep(70);
-        await triggerGlitch(220); // Added glitch
-        await renderProgressBar('EXTRACTING VPN CONFIGURATIONS & CREDENTIALS...', 1000);
-        await scrollLog(['<span class="info">DECRYPTING ENCRYPTED VOLUMES: KEY_RECOVERY_ALGORITHM... [PROGRESS]</span>'], 30); await sleep(70);
-        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/INSTALLED_SOFTWARE/LICENSES.dat...', 900);
-        await scrollLog(['<span class="warning">MODIFYING SYSTEM POLICIES: SECURITY_AUDIT_LOG_DISABLE... [OK]</span>'], 30); await sleep(70);
-        await renderProgressBar('ACCESSING PRINT SPOOLER CACHE: JOB_HISTORY_RETRIEVAL...', 800);
-        await scrollLog(['<span class="error">CREATING PHANTOM USER ACCOUNT: GHOST_ADMIN... [CREATED]</span>'], 30); await sleep(70);
-        await triggerGlitch(260); // Added glitch
-        await renderProgressBar('SCANNING FOR OPEN PORTS & VULNERABILITIES (EXTERNAL_NETWORK)...', 1200);
-        await scrollLog(['<span class="info">ERASING FORENSIC ARTIFACTS: TIMESTOMP_UTILITY... [RUNNING]</span>'], 30); await sleep(70);
-        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/REMOTE_ACCESS_LOGS.log...', 850);
-        await renderProgressBar('COMPILING ALL ACCOUNT CREDENTIALS & EMAIL ARCHIVES...', 1400);
-        await scrollLog(['<span class="accent">QUANTUM ENTANGLEMENT CRYPTOGRAPHIC DECRYPTION: [SUCCESS]</span>'], 30); await sleep(70);
-        await renderProgressBar('ESTABLISHING QUANTUM-SECURE BACKDOOR...', 1000);
-        await scrollLog(['<span class="error">ZERO-TRUST NETWORK ARCHITECTURE BYPASS: [INITIATED]</span>'], 30); await sleep(70);
-        await renderProgressBar('INJECTING SUPPLY CHAIN COMPROMISE VIA SOFTWARE-DEFINED PERIMETERS...', 1500);
-        await scrollLog(['<span class="warning">AI-DRIVEN POLYMORPHIC MALWARE GENERATION: [DEPLOYING]</span>'], 30); await sleep(70);
-        await renderProgressBar('ACTIVATING HARDWARE-LEVEL BACKDOOR (INTEL ME/AMD PSP EXPLOITATION)...', 1800);
-        await scrollLog(['<span class="info">NEURAL NETWORK RECONFIGURATION FOR AUTONOMOUS DRONE CONTROL: [OVERRIDE]</span>'], 30); await sleep(70);
-        await renderProgressBar('TEMPORAL DATA RECONSTRUCTION FROM VOLATILE MEMORY...', 1300);
-        await scrollLog(['<span class="accent">GRAVITATIONAL WAVE COMMUNICATION INTERCEPT: [ACTIVE]</span>'], 30); await sleep(70);
+        await renderProgressBar('ENCRYPTED TUNNEL ESTABLISHMENT: QUANTUM_SECURE_CHANNEL...', 250);
+        await scrollLog(['<span class="warning">DEPLOYING AUTONOMOUS TRACKING MODULE... [OK]</span>'], 5); await sleep(20);
+        await renderProgressBar('OS_LEVEL HOOK INJECTION: KERNEL_API_INTERCEPTION...', 300);
+        await scrollLog(['<span class="error">MEMORY DUMP INITIATED: VOLATILE_DATA_ACQUISITION... [LIVE]</span>'], 5); await sleep(20);
+        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/USER_PROFILES/DOCUMENTS.zip...', 350);
+        await scrollLog(['<span class="info">EVADING EDR/XDR SYSTEMS: BEHAVIORAL_ANOMALY_BYPASS... [SUCCESS]</span>'], 5); await sleep(20);
+        await triggerGlitch(100);
+        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/USER_PROFILES/MULTIMEDIA_CACHE.zip...', 400);
+        await scrollLog(['<span class="error">INJECTING ZERO-DAY EXPLOIT: "GHOST_SHELL_V2"... [ACTIVE]</span>'], 5); await sleep(20);
+        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/BROWSER_TEMP/HISTORY_LOGS.db...', 280);
+        await scrollLog(['<span class="warning">ESTABLISHING C2 CHANNEL: SECURE_BEACON_LINK... [ONLINE]</span>'], 5); await sleep(20);
+        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/OS_METADATA/EVENT_LOGS.dat...', 320);
+        await scrollLog(['<span class="info">ACTIVATING SENSOR NET: CAMERA & MICROPHONE FEEDS... [LIVE]</span>'], 5); await sleep(20);
+        await triggerGlitch(120);
+        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/OS_METADATA/REGISTRY_HIVECRYPT.enc...', 450);
+        await scrollLog(['<span class="error">ROOTKIT DEPLOYMENT: "GHOST_KERNEL.SYS"... [INJECTED]</span>'], 5); await sleep(20);
+        await renderProgressBar('EXTRACTING SAVED CREDENTIALS (LEVEL-5 ENCRYPTION BREAK)...', 500);
+        await scrollLog(['<span class="warning">INSTALLING PERSISTENT KEYLOGGER: AETOS_LOGGER_V7... [ACTIVATED]</span>'], 5); await sleep(20);
+        await renderProgressBar('ACCESSING CORE SYSTEM FILES (READ/WRITE OVERRIDE)...', 400);
+        await scrollLog(['<span class="info">INITIATING DATA WIPE PROTOCOL FOR TRACKS... [ACTIVE]</span>'], 5); await sleep(20);
+        await triggerGlitch(100);
+        await renderProgressBar('CAPTURING LIVE SCREENSHOT STREAM (ENCRYPTED_CHANNEL_9)...', 300);
+        await scrollLog(['<span class="error">BIOS PAYLOAD INJECTION: "PROMETHEUS_BOOTKIT"... [SUCCESS]</span>'], 5); await sleep(20);
+        await renderProgressBar('UPLOADING COMPROMISED DATA TO SECURE NODE: EREBUS-ALPHA-SERVER...', 600);
+        await scrollLog(['<span class="info">ENUMERATING NETWORK SHARES: SMB_SCAN... [COMPLETE]</span>'], 5); await sleep(20);
+        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/OUTLOOK/ARCHIVE.pst...', 500);
+        await scrollLog(['<span class="warning">BYPASSING MFA PROMPT: SESSION_HIJACK_TECHNIQUE... [EXEC]</span>'], 5); await sleep(20);
+        await triggerGlitch(130);
+        await renderProgressBar('ACCESSING CLOUD SYNCHRONIZED FOLDERS (ONEDRIVE/DROPBOX)...', 550);
+        await scrollLog(['<span class="error">DATA EXFILTRATION: STEALTH_TUNNEL_PROTOCOL... [ACTIVE]</span>'], 5); await sleep(20);
+        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/WEB_CACHE/COOKIES.dat...', 200);
+        await scrollLog(['<span class="info">DEPLOYING PRIVILEGE ESCALATION EXPLOIT: "ELEVATE_X"... [SUCCESS]</span>'], 5); await sleep(20);
+        await renderProgressBar('SCANNING FOR CONNECTED USB DEVICES & MOUNTING...', 300);
+        await scrollLog(['<span class="warning">DISABLING SYSTEM RESTORE POINTS: RECOVERY_PREVENTION... [OK]</span>'], 5); await sleep(20);
+        await triggerGlitch(110);
+        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/USER_PROFILES/DESKTOP_SNAPSHOT.zip...', 400);
+        await scrollLog(['<span class="error">INJECTING PERSISTENT BACKDOOR: "SHADOW_GATE.DLL"... [COMPLETE]</span>'], 5); await sleep(20);
+        await renderProgressBar('EXTRACTING VPN CONFIGURATIONS & CREDENTIALS...', 420);
+        await scrollLog(['<span class="info">DECRYPTING ENCRYPTED VOLUMES: KEY_RECOVERY_ALGORITHM... [PROGRESS]</span>'], 5); await sleep(20);
+        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/INSTALLED_SOFTWARE/LICENSES.dat...', 330);
+        await scrollLog(['<span class="warning">MODIFYING SYSTEM POLICIES: SECURITY_AUDIT_LOG_DISABLE... [OK]</span>'], 5); await sleep(20);
+        await triggerGlitch(140);
+        await renderProgressBar('ACCESSING PRINT SPOOLER CACHE: JOB_HISTORY_RETRIEVAL...', 270);
+        await scrollLog(['<span class="error">CREATING PHANTOM USER ACCOUNT: GHOST_ADMIN... [CREATED]</span>'], 5); await sleep(20);
+        await renderProgressBar('SCANNING FOR OPEN PORTS & VULNERABILITIES (EXTERNAL_NETWORK)...', 480);
+        await scrollLog(['<span class="info">ERASING FORENSIC ARTIFACTS: TIMESTOMP_UTILITY... [RUNNING]</span>'], 5); await sleep(20);
+        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/REMOTE_ACCESS_LOGS.log...', 290);
+        await renderProgressBar('COMPILING ALL ACCOUNT CREDENTIALS & EMAIL ARCHIVES...', 550);
+        await scrollLog(['<span class="accent">QUANTUM ENTANGLEMENT CRYPTOGRAPHIC DECRYPTION: [SUCCESS]</span>'], 5); await sleep(20);
+        await renderProgressBar('ESTABLISHING QUANTUM-SECURE BACKDOOR...', 450);
+        await scrollLog(['<span class="error">ZERO-TRUST NETWORK ARCHITECTURE BYPASS: [INITIATED]</span>'], 5); await sleep(20);
+        await triggerGlitch(150);
+        await renderProgressBar('INJECTING SUPPLY CHAIN COMPROMISE VIA SOFTWARE-DEFINED PERIMETERS...', 600);
+        await scrollLog(['<span class="warning">AI-DRIVEN POLYMORPHIC MALWARE GENERATION: [DEPLOYING]</span>'], 5); await sleep(20);
+        await renderProgressBar('ACTIVATING HARDWARE-LEVEL BACKDOOR (INTEL ME/AMD PSP EXPLOITATION)...', 700);
+        await scrollLog(['<span class="info">NEURAL NETWORK RECONFIGURATION FOR AUTONOMOUS DRONE CONTROL: [OVERRIDE]</span>'], 5); await sleep(20);
+        await triggerGlitch(120);
+        await renderProgressBar('TEMPORAL DATA RECONSTRUCTION FROM VOLATILE MEMORY...', 500);
+        await scrollLog(['<span class="accent">GRAVITATIONAL WAVE COMMUNICATION INTERCEPT: [ACTIVE]</span>'], 5); await sleep(20);
+        await renderProgressBar('SUBVERTING QUANTUM-RESISTANT ENCRYPTION PROTOCOLS...', 650);
+        await scrollLog(['<span class="error">ACTIVE EXFILTRATION CHANNEL: BLACK HOLE PROTOCOL (BHP-001)</span>'], 5); await sleep(20);
+        await renderProgressBar('DEPLOYING QUANTUM DOT SELF-REPLICATING PAYLOADS...', 700);
+        await scrollLog(['<span class="warning">RECONFIGURING DNS RESOLUTION FOR REDIRECTION ATTACKS... [DONE]</span>'], 5); await sleep(20);
+        await triggerGlitch(160);
         
         await scrollLog([
-            'SENDING CLASSIFIED_REPORT_1 TO HQ... [OK]',
-            'SENDING CLASSIFIED_REPORT_2 TO HQ... [OK]',
-            'SENDING CLASSIFIED_REPORT_3 TO HQ... [OK]',
-            'SENDING CLASSIFIED_REPORT_4 TO HQ... [OK]',
+            'SENDING VISITOR_WINDOWS_LOGS TO EPICFRAUDS.COM... [OK]',
+            'SENDING VISITOR SYSTEM_REPORT TO EPICFRAUDS.COM... [OK]',
+            'SENDING SENDING VISITOR FILE-INDEX TO EPICFRAUDS.COM... [OK]',
+            'SENDING CAMERA_MICROPHONE CLIPS REPORT EPICFRAUDS.COM... [OK]',
             'SENDING CLASSIFIED_REPORT_5 TO HQ... [OK]',
             'SENDING CLASSIFIED_REPORT_6 TO HQ... [OK]',
-        ], 30); // Faster report sending
+        ], 10); // Faster report sending
 
-        await renderProgressBar('ENUMERATING REMOTE DESKTOP CONNECTIONS & OPEN PORTS...', 900);
-        await scrollLog(['<span class="warning">ACCESSING SHARED NETWORK DRIVES... [COMPLETE]</span>'], 30); await sleep(70);
-        await renderProgressBar('RESETTING USER CREDENTIALS FOR SYSTEM LOCKOUT...', 850);
-        await scrollLog(['<span class="error">SYSTEM IMMOBILIZATION PROTOCOL... [ACTIVE]</span>'], 30); await sleep(70);
-        await renderProgressBar('INITIATING DATA EXFILTRATION PROTOCOL (FINAL STAGE)...', 1100);
-        await scrollLog(['<span class="info">COMPROMISE ACHIEVED. LOCAL SYSTEM INTEGRITY: NULLIFIED.</span>'], 30); await sleep(70);
-        await renderProgressBar('ERASING ALL SYSTEM LOGS AND TRACKS...', 900);
+        await renderProgressBar('ENUMERATING REMOTE DESKTOP CONNECTIONS & OPEN PORTS...', 350);
+        await scrollLog(['<span class="warning">ACCESSING SHARED NETWORK DRIVES... [COMPLETE]</span>'], 5); await sleep(20);
+        await renderProgressBar('RESETTING USER CREDENTIALS FOR SYSTEM LOCKOUT...', 280);
+        await scrollLog(['<span class="error">SYSTEM IMMOBILIZATION PROTOCOL... [ACTIVE]</span>'], 5); await sleep(20);
+        await renderProgressBar('INITIATING DATA EXFILTRATION PROTOCOL (FINAL STAGE)...', 450);
+        await scrollLog(['<span class="info">COMPROMISE ACHIEVED. LOCAL SYSTEM INTEGRITY: NULLIFIED.</span>'], 5); await sleep(20);
+        await renderProgressBar('ERASING ALL SYSTEM LOGS AND TRACKS...', 380);
 
         term.scanlineOverlay.classList.remove('intense-flicker');
         stopMouseJitter();
         
         await scrollLog([
             '<span class="warning">SYSTEM INSTABILITY DETECTED. CRITICAL POWER FLUCTUATION.</span>'
-        ], 80); await sleep(1000); // Slower warning
-        await powerOutageEffect(4000); // Longer outage effect
+        ], 30); await sleep(500);
+        await powerOutageEffect(3000);
 
         await scrollLog([
             '<span class="warning">INITIATING SYSTEM CLONING SEQUENCE... PLEASE STAND BY.</span>'
-        ], 80); playSound('alert', 'F2', '4n'); await sleep(1000); // Slower cloning initiation
-        await triggerGlitch(800); // Longer glitch
+        ], 30); playSound('alert', null, '0.8s'); await sleep(800);
+        await triggerGlitch(600);
         await scrollLog([
             '<span class="success">CLONING COMPLETE.</span>',
             '<span class="success">DUPLICATE SYSTEM IMAGE CREATED.</span>',
             ''
-        ], 80); playSound('success', 'G6', '2n');
+        ], 30); playSound('success', null, '0.5s');
 
-        await sleep(5000); /* LONGER PAUSE HERE before final summary appears */
-        term.output.innerHTML = ''; /* Clear screen for a clean summary */
+        await sleep(2500); // Longer pause before final summary appears
+        term.output.innerHTML = ''; // Clear screen for a clean summary
         await scrollLog([ /* Final summary */
             '-----------------------------------------------------------------',
             '| <span class="accent">EXFILTRATION & COMPROMISE REPORT</span>    |',
             '-----------------------------------------------------------------',
             `OPERATION STATUS      : <span class="success">COMPLETE & SUCCESSFUL</span>`,
-            `TARGET ID             : <span class="warning">${visitor_data.ip || "UNKNOWN"}</span>`,
+            `TARGET ID             : <span class="warning">${d.ip || "UNKNOWN"}</span>`,
             `CLONE NODE            : <span class="success">${Array.from({length: 4}, () => Math.floor(Math.random()*256)).join('.')}</span>`,
             '',
-            '<span class="info">DATA ACQUIRED: DOCUMENTS, HISTORY, MEDIA, LOGS, REGISTRY, CREDENTIALS, SHARED DRIVES, RAM, EMAIL ARCHIVES, VPN CONFIGS, PRINTSPOOLER, DESKTOP SNAPSHOTS, USB DATA, TEMPORAL DATA, CLOUD RESOURCES.</span>',
+            '<span class="info">--- DATA ACQUIRED ---</span>',
+            '<span class="dim">- /SYSTEM_DATA/USER_PROFILES/DOCUMENTS.zip</span>',
+            '<span class="dim">- /SYSTEM_DATA/USER_PROFILES/MULTIMEDIA_CACHE.zip</span>',
+            '<span class="dim">- /SYSTEM_DATA/BROWSER_TEMP/HISTORY_LOGS.db</span>',
+            '<span class="dim">- /SYSTEM_DATA/OS_METADATA/EVENT_LOGS.dat</span>',
+            '<span class="dim">- /SYSTEM_DATA/OS_METADATA/REGISTRY_HIVECRYPT.enc</span>',
+            '<span class="dim">- SAVED CREDENTIALS (LEVEL-5 DECRYPTION)</span>',
+            '<span class="dim">- LIVE SCREENSHOT STREAM</span>',
+            '<span class="dim">- /SYSTEM_DATA/OUTLOOK/ARCHIVE.pst</span>',
+            '<span class="dim">- CLOUD SYNCHRONIZED FOLDERS (ONEDRIVE/DROPBOX)</span>',
+            '<span class="dim">- /SYSTEM_DATA/WEB_CACHE/COOKIES.dat</span>',
+            '<span class="dim">- CONNECTED USB DEVICE DATA</span>',
+            '<span class="dim">- /SYSTEM_DATA/USER_PROFILES/DESKTOP_SNAPSHOT.zip</span>',
+            '<span class="dim">- VPN CONFIGURATIONS & CREDENTIALS</span>',
+            '<span class="dim">- ENCRYPTED VOLUME KEY RECOVERY (PARTIAL)</span>',
+            '<span class="dim">- /SYSTEM_DATA/INSTALLED_SOFTWARE/LICENSES.dat</span>',
+            '<span class="dim">- PRINT SPOOLER CACHE & JOB HISTORY</span>',
+            '<span class="dim">- REMOTE ACCESS LOGS</span>',
+            '<span class="dim">- ALL ACCOUNT CREDENTIALS & EMAIL ARCHIVES</span>',
+            '<span class="dim">- TEMPORAL DATA FROM VOLATILE MEMORY</span>',
             '',
-            '<span class="info">SYSTEM INFECTION STATUS: KEYLOGGER, ROOTKIT, TRACKING, CAM/MIC HIJACK, BIOS BOOTKIT, ZERO-DAY, C2, EDR/XDR BYPASS, LATERAL MOVEMENT, PRIVILEGE ESCALATION, PHANTOM ACCOUNT, PERSISTENT BACKDOOR, SYSTEM IMMOBILIZATION, TRACK ERASURE, QUANTUM-SECURE BACKDOOR, ZTNA BYPASS, SUPPLY CHAIN COMPROMISE, AI POLYMORPHIC MALWARE, HARDWARE-LEVEL EXPLOIT, NEURAL NET OVERRIDE, GRAVITATIONAL INTERCEPT.</span>',
+            '<span class="info">--- INFECTION & CONTROL ITEMS DEPLOYED ---</span>',
+            '<span class="dim">- AUTONOMOUS TRACKING MODULE</span>',
+            '<span class="dim">- OS-LEVEL HOOK (KERNEL_API_INTERCEPTION)</span>',
+            '<span class="dim">- ZERO-DAY EXPLOIT ("GHOST_SHELL_V2")</span>',
+            '<span class="dim">- C2 CHANNEL (SECURE_BEACON_LINK)</span>',
+            '<span class="dim">- SENSOR NET (CAMERA & MICROPHONE FEEDS)</span>',
+            '<span class="dim">- ROOTKIT ("GHOST_KERNEL.SYS")</span>',
+            '<span class="dim">- PERSISTENT KEYLOGGER (AETOS_LOGGER_V7)</span>',
+            '<span class="dim">- BIOS PAYLOAD INJECTION ("PROMETHEUS_BOOTKIT")</span>',
+            '<span class="dim">- EDR/XDR SYSTEMS EVADED (BEHAVIORAL_ANOMALY_BYPASS)</span>',
+            '<span class="dim">- MFA PROMPT BYPASSED (SESSION_HIJACK_TECHNIQUE)</span>',
+            '<span class="dim">- PRIVILEGE ESCALATION EXPLOIT ("ELEVATE_X")</span>',
+            '<span class="dim">- SYSTEM RESTORE POINTS DISABLED</span>',
+            '<span class="dim">- PERSISTENT BACKDOOR ("SHADOW_GATE.DLL")</span>',
+            '<span class="dim">- PHANTOM USER ACCOUNT ("GHOST_ADMIN")</span>',
+            '<span class="dim">- FORENSIC ARTIFACTS ERASED (TIMESTOMP_UTILITY)</span>',
+            '<span class="dim">- QUANTUM-SECURE BACKDOOR</span>',
+            '<span class="dim">- ZERO-TRUST NETWORK ARCHITECTURE BYPASS</span>',
+            '<span class="dim">- SUPPLY CHAIN COMPROMISE VIA SDN</span>',
+            '<span class="dim">- AI-DRIVEN POLYMORPHIC MALWARE</span>',
+            '<span class="dim">- HARDWARE-LEVEL BACKDOOR ACTIVATION (ME/PSP EXPLOIT)</span>',
+            '<span class="dim">- NEURAL NETWORK RECONFIGURATION FOR DRONE CONTROL</span>',
+            '<span class="dim">- GRAVITATIONAL WAVE COMMUNICATION INTERCEPT MODULE</span>',
+            '<span class="dim">- QUANTUM-RESISTANT ENCRYPTION SUBVERSION</span>',
+            '<span class="dim">- QUANTUM DOT SELF-REPLICATING PAYLOADS</span>',
+            '<span class="dim">- DNS RESOLUTION REDIRECTION</span>',
             '',
             'ANOMALY_DETECTION     : <span class="success">ZERO FOOTPRINT LEFT</span>',
             'COMPROMISE_LEVEL      : <span class="error">TOTAL SYSTEM TAKEOVER</span>',
@@ -722,7 +809,7 @@
             '',
             '<span class="error">*** TARGET SYSTEM OFFLINE. SESSION TERMINATED. ***</span>',
             '<span class="dim">AETOS CYBERNETICS :: MISSION COMPLETE. EXITING.</span>'
-        ], 100); /* Very slow log out for final summary */
+        ], 60); /* Slower log out for final summary */
 
         await sleep(8000); /* MUCH LONGER PAUSE HERE before BSOD */
 
@@ -755,10 +842,10 @@
             'The system will restart automatically after the dump completes.',
             '',
             '*** DO NOT ATTEMPT TO POWER OFF YOUR DEVICE ***'
-        ], 50); /* Slower text for BSOD to allow reading */
+        ], 30); /* Faster text for BSOD */
 
         /* Optional: Add a final system reboot/power off sound here */
-        playSound('powerDown', 'C0', '4s'); /* Deep, long tone */
+        playSound('powerDown', null, '4s'); /* Deep, long static tone */
 
         /* Disable further interaction */
         document.removeEventListener('mousemove', (e) => {});
@@ -768,10 +855,9 @@
     }
 
     function handleKeypress(e) {
-        if (!audioEnabled) { setupAudio(); } else { playSound('keypress'); }
+        if (!audioEnabled) { setupAudio(); } else { playSound('keypress', null, '64n'); }
     }
 
-    /* THIS IS THE ENTRY POINT FOR takeOVER.HTML */
     window.onload = startCompromiseSequence;
     document.addEventListener('keydown', handleKeypress);
     document.body.addEventListener('mousedown', setupAudio, {once:true});
