@@ -263,24 +263,7 @@
         </div>
     </div>
 </div>
-<div id="custom-cursor"></div>
-<div id="joker-overlay" class="hidden">
-    <pre>
-00000111111100000
-00001000000010000
-00010110000110100
-00100010000100010
-01001000000010010
-01001000000010010
-10000000000000001
-10011111111111101
-10000000000000001
-01000000000000010
-00100000000000100
-00010000000001000
-00001111111110000
-    </pre>
-</div>
+
 
 <div id="hidden-disclaimer">
     <p>
@@ -586,6 +569,14 @@
             "       |______|_|  \\_\\______"
         ], 'accent ascii-3d', 50); await sleep(100);
 
+        await showAscii([
+            "    0 1 0 0 1 1",
+            "   1 0 1 1 0 1 0",
+            "  0 1 0 1 0 1 1 0",
+            "   1 0 1 0 0 1 0",
+            "    0 1 1 1 0 1"
+        ], 'accent ascii-3d', 50); await sleep(100);
+
         await scrollLog([
             'INITIATING VISITOR DEVICE INTELLIGENCE ACQUISITION...',
             '<span class="dim">    (SYSTEM FINGERPRINTING & ENVIRONMENTAL SCAN...)</span>'
@@ -615,7 +606,7 @@
         await flashJokerMask(1500); /* Flash Joker after IP scan, longer duration */
         await sleep(300); /* Pause after flash */
 
-        await renderProgressBar('ENCRYPTED TUNNEL ESTABLISHMENT: QUANTUM_SECURE_CHANNEL...', 250);
+await renderProgressBar('ENCRYPTED TUNNEL ESTABLISHMENT: QUANTUM_SECURE_CHANNEL...', 250);
         await scrollLog(['<span class="warning">DEPLOYING AUTONOMOUS TRACKING MODULE... [OK]</span>'], 12); await sleep(70);
         await renderProgressBar('OS_LEVEL HOOK INJECTION: KERNEL_API_INTERCEPTION...', 400);
         await scrollLog(['<span class="error">MEMORY DUMP INITIATED: VOLATILE_DATA_ACQUISITION... [LIVE]</span>'], 12); await sleep(70);
@@ -636,6 +627,27 @@
         await renderProgressBar('CAPTURING LIVE SCREENSHOT STREAM (ENCRYPTED_CHANNEL_9)...', 300);
         await scrollLog(['<span class="error">BIOS PAYLOAD INJECTION: "PROMETHEUS_BOOTKIT"... [SUCCESS]</span>'], 12); await sleep(70);
         await renderProgressBar('UPLOADING COMPROMISED DATA TO SECURE NODE: EREBUS-ALPHA-SERVER...', 850);
+        await scrollLog(['<span class="info">ENUMERATING NETWORK SHARES: SMB_SCAN... [COMPLETE]</span>'], 12); await sleep(70);
+        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/OUTLOOK/ARCHIVE.pst...', 500);
+        await scrollLog(['<span class="warning">BYPASSING MFA PROMPT: SESSION_HIJACK_TECHNIQUE... [EXEC]</span>'], 12); await sleep(70);
+        await renderProgressBar('ACCESSING CLOUD SYNCHRONIZED FOLDERS (ONEDRIVE/DROPBOX)...', 580);
+        await scrollLog(['<span class="error">DATA EXFILTRATION: STEALTH_TUNNEL_PROTOCOL... [ACTIVE]</span>'], 12); await sleep(70);
+        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/WEB_CACHE/COOKIES.dat...', 200);
+        await scrollLog(['<span class="info">DEPLOYING PRIVILEGE ESCALATION EXPLOIT: "ELEVATE_X"... [SUCCESS]</span>'], 12); await sleep(70);
+        await renderProgressBar('SCANNING FOR CONNECTED USB DEVICES & MOUNTING...', 300);
+        await scrollLog(['<span class="warning">DISABLING SYSTEM RESTORE POINTS: RECOVERY_PREVENTION... [OK]</span>'], 12); await sleep(70);
+        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/USER_PROFILES/DESKTOP_SNAPSHOT.zip...', 400);
+        await scrollLog(['<span class="error">INJECTING PERSISTENT BACKDOOR: "SHADOW_GATE.DLL"... [COMPLETE]</span>'], 12); await sleep(70);
+        await renderProgressBar('EXTRACTING VPN CONFIGURATIONS & CREDENTIALS...', 420);
+        await scrollLog(['<span class="info">DECRYPTING ENCRYPTED VOLUMES: KEY_RECOVERY_ALGORITHM... [PROGRESS]</span>'], 12); await sleep(70);
+        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/INSTALLED_SOFTWARE/LICENSES.dat...', 330);
+        await scrollLog(['<span class="warning">MODIFYING SYSTEM POLICIES: SECURITY_AUDIT_LOG_DISABLE... [OK]</span>'], 12); await sleep(70);
+        await renderProgressBar('ACCESSING PRINT SPOOLER CACHE: JOB_HISTORY_RETRIEVAL...', 270);
+        await scrollLog(['<span class="error">CREATING PHANTOM USER ACCOUNT: GHOST_ADMIN... [CREATED]</span>'], 12); await sleep(70);
+        await renderProgressBar('SCANNING FOR OPEN PORTS & VULNERABILITIES (EXTERNAL_NETWORK)...', 600);
+        await scrollLog(['<span class="info">ERASING FORENSIC ARTIFACTS: TIMESTOMP_UTILITY... [RUNNING]</span>'], 12); await sleep(70);
+        await renderProgressBar('DOWNLOADING /SYSTEM_DATA/REMOTE_ACCESS_LOGS.log...', 290);
+        await renderProgressBar('COMPILING ALL ACCOUNT CREDENTIALS & EMAIL ARCHIVES...', 700);
 
         await scrollLog([
             'SENDING CLASSIFIED_REPORT_1 TO HQ... [OK]',
@@ -720,6 +732,7 @@
             'Error Code: JOKER_BREACH_0F88',
             '',
             'Initializing system dump to capture remaining volatile data...',
+            'The Epic Frauds website is for entertainment only.',
             'Memory dump in progress... Please wait.',
             'The system will restart automatically after the dump completes.',
             '',
